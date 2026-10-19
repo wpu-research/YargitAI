@@ -65,6 +65,41 @@ def atif_sayisi(con: sqlite3.Connection, rids: list[int]) -> dict[int, int]:
     return dict(con.execute(q, rids).fetchall())
 
 
+def durum(con: sqlite3.Connection, rid: int) -> dict:
+    """Kararın güncelliğine dair sinyaller: mülga kanun, atıf güncelliği, içtihat değişikliği bağlamı."""
+    from .anonim import maskele
+    from .answer import kunye
+    from .extract import MULGA
+    mulga = []
+    maddeler: dict[str, set[str]] = {}
+    for k, m in con.execute("SELECT kanun, madde FROM madde_atif WHERE rid=?", (rid,)):
+        maddeler.setdefault(k, set()).add(m)
+    for kanun, mset in maddeler.items():
+        if kanun in MULGA:
+            ad, yerine, istisna = MULGA[kanun]
+            if istisna and mset - {""} and mset - {""} <= istisna:
+                continue  # yalnız yürürlükteki maddelere dayanıyor
+            mulga.append({"kanun": kanun, "ad": ad, "yerine": yerine})
+    ozet = con.execute(
+        """SELECT COUNT(*), MAX(k.yil), SUM(k.daire_turu='kurul'), SUM(a.isaret='teyit')
+           FROM atif a JOIN karar k ON k.rid=a.kaynak_rid WHERE a.hedef_rid=?""", (rid,)).fetchone()
+    degisiklik = [
+        {"rid": r["rid"], "kunye": kunye(dict(r)), "baglam": maskele(r["baglam"] or "")}
+        for r in con.execute(
+            """SELECT k.rid, k.daire, k.esas_no, k.karar_no, k.karar_tarihi, a.baglam
+               FROM atif a JOIN karar k ON k.rid=a.kaynak_rid
+               WHERE a.hedef_rid=? AND a.isaret='degisiklik' ORDER BY k.karar_tarihi DESC LIMIT 5""", (rid,))]
+    return {
+        "mulga": mulga,
+        "atif_toplam": ozet[0] or 0,
+        "son_atif_yili": ozet[1],
+        "kurul_atfi": ozet[2] or 0,
+        "teyit": ozet[3] or 0,
+        "degisiklik": degisiklik,
+        "seviye": "dikkat" if (mulga or degisiklik) else "bilgi",
+    }
+
+
 def madde_istatistik(con: sqlite3.Connection, kanun: str, madde: str) -> dict:
     """Bir kanun maddesine dayanan kararların daire, yıl ve sonuç dağılımı."""
     base = "FROM madde_atif m JOIN karar k ON k.rid=m.rid WHERE m.kanun=? AND m.madde=?"
@@ -94,8 +129,8 @@ def reextract(con: sqlite3.Connection, batch: int = 5000) -> None:
         for rid, daire, blob in rows:
             text = unpack(blob)
             con.executemany(
-                "INSERT INTO atif(kaynak_rid, tur, hedef_daire, esas_no, karar_no, tarih) VALUES(?,?,?,?,?,?)",
-                [(rid, a.tur, a.daire, a.esas, a.karar, parse.parse_date(a.tarih))
+                "INSERT INTO atif(kaynak_rid, tur, hedef_daire, esas_no, karar_no, tarih, baglam, isaret) VALUES(?,?,?,?,?,?,?,?)",
+                [(rid, a.tur, a.daire, a.esas, a.karar, parse.parse_date(a.tarih), a.baglam, a.isaret)
                  for a in extract.karar_atiflari(text, daire)])
             con.executemany("INSERT OR IGNORE INTO madde_atif(rid, kanun, madde) VALUES(?,?,?)",
                             [(rid, m.kanun, m.madde) for m in extract.madde_atiflari(text)])

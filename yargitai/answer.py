@@ -12,6 +12,7 @@ import os
 import re
 import sqlite3
 
+from .anonim import maskele
 from .db import unpack
 from .search import Filtre, Sonuc, hybrid, snippet
 
@@ -84,7 +85,7 @@ def answer(con: sqlite3.Connection, question: str, f: Filtre | None = None, k: i
     ctx = []
     for h in hits:
         text = unpack(con.execute("SELECT metin FROM karar WHERE rid=?", (h.rid,)).fetchone()[0])
-        ctx.append((kunye(h), text[:CTX_CHARS]))
+        ctx.append((kunye(h), maskele(text[:CTX_CHARS])))  # LLM'e kişisel veri gitmez
     kararlar = [{"ref": f"K{i + 1}", "rid": h.rid, "kunye": kunye(h), "sonuc": h.sonuc,
                  "snippet": h.snippet, "atif_alan": h.atif_alan} for i, h in enumerate(hits)]
     if _llm_available():

@@ -73,3 +73,36 @@ def test_verify_flags_unknown_kunye():
     issues = verify(con, "Bkz. [K1] ve 2023/1 E., 2023/2 K. ile 2020/9 E., 2020/10 K. ve [K9]", n_ctx=3)
     kinds = sorted(i["tur"] for i in issues)
     assert kinds == ["dogrulanamayan_kunye", "gecersiz_referans"]
+
+
+def test_atif_isaret():
+    t = ("Dairemiz uygulamaları da bu yönde ise de Yargıtay 5. Hukuk Dairesinin 2021/5768 Esas, "
+         "2021/13760 Karar sayılı bozma ilamı ile içtihat değişikliği yapıldığı anlaşıldığından")
+    assert extract.karar_atiflari(t, "9. Hukuk Dairesi")[0].isaret == "degisiklik"
+    t2 = "Aynı yönde Yargıtay Hukuk Genel Kurulu, 04.12.2013 gün, 2013/21-445 Esas, 2013/1625 Karar"
+    assert extract.karar_atiflari(t2, "9. Hukuk Dairesi")[0].isaret == "teyit"
+    t3 = "sanığın sola dönülmez levhasına rağmen; Yargıtay 12. Ceza Dairesinin 2021/10341 Esas, 2022/4855 Karar sayılı"
+    assert extract.karar_atiflari(t3, "12. Ceza Dairesi")[0].isaret is None
+
+
+def test_durum_mulga():
+    from yargitai import graph
+    con = sqlite3.connect(":memory:")
+    con.row_factory = sqlite3.Row
+    con.executescript(SCHEMA)
+    con.execute("INSERT INTO karar(rid,kaynak,kaynak_id,daire,daire_turu,metin) VALUES(1,'t','1','9. Hukuk Dairesi','hukuk',?)", (pack("x"),))
+    con.execute("INSERT INTO karar(rid,kaynak,kaynak_id,daire,daire_turu,metin) VALUES(2,'t','2','9. Hukuk Dairesi','hukuk',?)", (pack("x"),))
+    con.executemany("INSERT INTO madde_atif VALUES(?,?,?)", [(1, "818", "41"), (2, "1475", "14")])
+    assert [m["kanun"] for m in graph.durum(con, 1)["mulga"]] == ["818"]
+    assert graph.durum(con, 2)["mulga"] == []  # 1475 m.14 yürürlükte
+
+
+def test_anonim_maskele():
+    from yargitai.anonim import maskele
+    t = ("44152463504 T.C. kimlik nolu sanığın 0507 918 07 96 numaralı telefonu, 41 R 8295 plakalı aracı, "
+         "TR33 0006 1005 1978 6457 8413 26 IBAN'ı ve onder@hotmail.com adresi; 2023/3001 E. ile 12345678901 sayısı")
+    m = maskele(t)
+    for tag in ("[TCKN]", "[TELEFON]", "[PLAKA]", "[IBAN]", "[E-POSTA]"):
+        assert tag in m
+    assert "2023/3001 E." in m and "12345678901" in m  # künye ve geçersiz TCKN dokunulmaz
+    assert maskele("587 911 2014 7 11560") == "587 911 2014 7 11560"

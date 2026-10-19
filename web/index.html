@@ -67,6 +67,7 @@ h3{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute
   <nav>
     <button data-tab="ara" class="on">Emsal Ara</button>
     <button data-tab="sor">Soru Sor</button>
+    <button data-tab="dilekce">Dilekçe Kontrol</button>
     <button data-tab="istatistik">Veri</button>
   </nav>
 </header>
@@ -97,6 +98,20 @@ h3{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute
     </div>
   </section>
 
+  <section id="tab-dilekce" class="hidden">
+    <form class="bar" id="f-dilekce">
+      <textarea id="dilekce-metin" placeholder="Dilekçe metnini yapıştırın ya da dosya seçin (.udf, .docx, .pdf, .txt). Dilekçedeki her künye veritabanında kontrol edilir, iddialara emsal aranır."></textarea>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <input type="file" id="dilekce-dosya" accept=".udf,.docx,.pdf,.txt">
+        <button class="btn">Kontrol et</button>
+      </div>
+    </form>
+    <div class="grid">
+      <div class="card" id="dilekce-kunye" style="padding:16px"><div class="empty">Künye kontrol sonuçları burada görünür.</div></div>
+      <div class="card" id="dilekce-emsal"></div>
+    </div>
+  </section>
+
   <section id="tab-istatistik" class="hidden">
     <form class="bar" id="f-madde">
       <input type="search" id="madde-q" placeholder="Madde analizi: kanun/madde, ör. 4857/25 · 6100/370 · 5237/106">
@@ -115,7 +130,7 @@ let lastQ='';
 
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
-  ['ara','sor','istatistik'].forEach(t=>$('#tab-'+t).classList.toggle('hidden',t!==b.dataset.tab));
+  ['ara','sor','dilekce','istatistik'].forEach(t=>$('#tab-'+t).classList.toggle('hidden',t!==b.dataset.tab));
   if(b.dataset.tab==='istatistik') loadStats();
 });
 
@@ -175,7 +190,12 @@ async function openKarar(rid){
       <span class="chip">${a.hedef_rid?'veritabanında':'kapsam dışı'}</span></div>`;}).join('')||'<div class="meta">Atıf bulunamadı.</div>';
   const ab=d.atif_alan.map(a=>`<div class="row"><span class="link" data-rid="${a.rid}">${esc(a.kunye)}</span><span class="chip">${SONUC[a.sonuc]||''}</span></div>`).join('')||'<div class="meta">Henüz atıf alan karar yok.</div>';
   const md=d.maddeler.map(m=>`<span class="chip">${m.kanun}${m.madde?' m.'+m.madde:''}</span>`).join(' ');
+  const du=d.durum, dn=[];
+  du.mulga.forEach(m=>dn.push(`<div class="warn"><b>Mülga kanun:</b> Karar ${m.kanun} sayılı ${esc(m.ad)}'na dayanıyor. Yerini ${esc(m.yerine)} aldı; güncel karşılığını kontrol edin.</div>`));
+  du.degisiklik.forEach(x=>dn.push(`<div class="warn"><b>İçtihat değişikliği bağlamında atıf:</b> <span class="link" data-rid="${x.rid}">${esc(x.kunye)}</span><div class="meta" style="margin-top:4px">…${esc(x.baglam)}…</div></div>`));
+  const guncel=du.atif_toplam?`${du.atif_toplam} kez atıf aldı · son atıf ${du.son_atif_yili||'?'}${du.kurul_atfi?` · ${du.kurul_atfi} kurul atfı`:''}${du.teyit?` · ${du.teyit} teyit`:''}`:'Veritabanında bu karara atıf yapan karar yok.';
   $('#detail').innerHTML=`<h2>${esc(d.kunye)}</h2><div class="meta">${chips(d)}</div>
+    <h3>Güncellik</h3><div class="meta">${guncel}</div>${dn.join('')}
     <h3>Dayandığı kanun maddeleri</h3><div>${md||'<span class="meta">—</span>'}</div>
     <h3>Atıf yaptığı kararlar</h3>${at}
     <h3>Bu karara atıf yapanlar</h3>${ab}
@@ -210,6 +230,29 @@ async function loadStats(){
     <div class="card"><h3>En çok atıf alan kararlar</h3>${s.en_cok_atif.map(k=>`<div class="row"><span class="link" data-rid="${k.rid}">${esc(k.daire)} ${esc(k.esas_no)} E.</span><span>${k.n}</span></div>`).join('')}</div>`;
   $('#stats').querySelectorAll('.link').forEach(l=>l.onclick=()=>{$('nav button[data-tab=ara]').click();openKarar(l.dataset.rid);});
 }
+
+const DURUM={dogrulandi:['Doğrulandı','onama'],uyusmazlik:['Uyuşmazlık','bozma'],supheli:['Kayıtta yok','bozma'],kapsam_disi:['Kapsam dışı','']};
+$('#f-dilekce').onsubmit=async e=>{
+  e.preventDefault();
+  const f=$('#dilekce-dosya').files[0], t=$('#dilekce-metin').value.trim(); if(!f&&!t) return;
+  $('#dilekce-kunye').innerHTML='<div class="empty">Dilekçe okunuyor, künyeler kontrol ediliyor…</div>'; $('#dilekce-emsal').innerHTML='';
+  let r;
+  if(f){ const fd=new FormData(); fd.append('dosya',f); r=await fetch('/api/dilekce/dosya',{method:'POST',body:fd}); }
+  else r=await fetch('/api/dilekce',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({metin:t})});
+  const d=await r.json();
+  if(!r.ok){ $('#dilekce-kunye').innerHTML=`<div class="warn">${esc(d.detail||'Dilekçe okunamadı.')}</div>`; return; }
+  lastQ='';
+  const o=d.ozet;
+  const head=`<h3>Künyeler</h3><div class="meta"><span class="chip onama">${o.dogrulandi} doğrulandı</span><span class="chip bozma">${o.uyusmazlik} uyuşmazlık</span><span class="chip bozma">${o.supheli} kayıtta yok</span><span class="chip">${o.kapsam_disi} kapsam dışı</span></div>`;
+  const rows=d.kunyeler.map(k=>{const [lbl,cls]=DURUM[k.durum];
+    const det=k.durum==='dogrulandi'||k.durum==='uyusmazlik'?`<span class="link" data-rid="${k.rid}">${esc(k.kunye)}</span>${(k.sorunlar||[]).map(x=>`<div class="warn">${esc(x)}</div>`).join('')}`:`<div class="meta">${esc(k.aciklama)}</div>`;
+    return `<div style="padding:10px 0;border-bottom:1px solid var(--line)"><div class="row"><b>${esc(k.iddia)}</b><span class="chip ${cls}">${lbl}</span></div>${det}</div>`;}).join('')||'<div class="meta">Dilekçede Yargıtay künyesi bulunamadı.</div>';
+  $('#dilekce-kunye').innerHTML=head+rows;
+  $('#dilekce-kunye').querySelectorAll('.link').forEach(l=>l.onclick=()=>{$('nav button[data-tab=ara]').click();openKarar(l.dataset.rid);});
+  $('#dilekce-emsal').innerHTML=d.iddialar.map(i=>`<div style="padding:14px 16px;background:var(--chip)"><div class="meta">Dilekçeden</div>${esc(i.paragraf.slice(0,260))}…</div>`+
+    i.emsaller.map(h=>hitHtml(h)).join('')).join('')||'<div class="empty">Emsal aranacak uzunlukta paragraf bulunamadı.</div>';
+  bindHits('#dilekce-emsal');
+};
 
 $('#f-madde').onsubmit=async e=>{
   e.preventDefault();

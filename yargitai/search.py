@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from . import graph
+from .anonim import maskele
 from .db import unpack
 from .textnorm import fold, fts_query, stem, tokens
 
@@ -185,6 +186,6 @@ def hybrid(con: sqlite3.Connection, q: str, f: Filtre | None = None, k: int = 20
         r = rows[rid]
         s = fused[rid] * (1.15 if r["daire_turu"] == "kurul" else 1.0) * (1 + 0.05 * np.log1p(atif.get(rid, 0)))
         out.append(Sonuc(rid, s, r["daire"], r["esas_no"], r["karar_no"], r["karar_tarihi"], r["sonuc"],
-                         r["dava_turu"], snippet(unpack(r["metin"]), q), atif.get(rid, 0), src[rid]))
+                         r["dava_turu"], snippet(maskele(unpack(r["metin"])), q), atif.get(rid, 0), src[rid]))
     out.sort(key=lambda x: -x.skor)
     return out[:k]

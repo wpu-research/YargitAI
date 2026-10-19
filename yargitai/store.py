@@ -42,8 +42,8 @@ def upsert(con: sqlite3.Connection, *, kaynak: str, kaynak_id: str, daire: str,
     atiflar = extract.karar_atiflari(text, daire)
     if atiflar:
         con.executemany(
-            "INSERT INTO atif(kaynak_rid, tur, hedef_daire, esas_no, karar_no, tarih) VALUES(?,?,?,?,?,?)",
-            [(rid, a.tur, a.daire, a.esas, a.karar, parse.parse_date(a.tarih)) for a in atiflar],
+            "INSERT INTO atif(kaynak_rid, tur, hedef_daire, esas_no, karar_no, tarih, baglam, isaret) VALUES(?,?,?,?,?,?,?,?)",
+            [(rid, a.tur, a.daire, a.esas, a.karar, parse.parse_date(a.tarih), a.baglam, a.isaret) for a in atiflar],
         )
     maddeler = extract.madde_atiflari(text)
     if maddeler:

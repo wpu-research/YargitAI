@@ -53,7 +53,9 @@ CREATE TABLE IF NOT EXISTS atif (
     esas_no TEXT NOT NULL,
     karar_no TEXT NOT NULL,
     tarih TEXT,
-    hedef_rid INTEGER                -- çözümlenince dolar
+    hedef_rid INTEGER,               -- çözümlenince dolar
+    baglam TEXT,                     -- atfın çevresindeki ~400 karakter
+    isaret TEXT                      -- teyit | degisiklik | NULL
 );
 CREATE INDEX IF NOT EXISTS atif_kaynak ON atif(kaynak_rid);
 CREATE INDEX IF NOT EXISTS atif_hedef ON atif(hedef_rid);
@@ -82,6 +84,10 @@ def connect(path: Path | str = DB_PATH) -> sqlite3.Connection:
     con.execute("PRAGMA synchronous=NORMAL")
     con.execute("PRAGMA cache_size=-200000")
     con.executescript(SCHEMA)
+    cols = {r[1] for r in con.execute("PRAGMA table_info(atif)")}
+    for col in ("baglam", "isaret"):
+        if col not in cols:  # eski veritabanlarını göç ettir
+            con.execute(f"ALTER TABLE atif ADD COLUMN {col} TEXT")
     return con
 
 

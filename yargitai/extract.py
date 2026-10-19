@@ -18,7 +18,7 @@ _CITE = re.compile(
 )
 _CTX_WINDOW = 120
 
-_DAIRE = re.compile(r"(\d{1,2})\s*\.?\s*(Hukuk|Ceza)\s+Daire", re.I)
+_DAIRE = re.compile(r"(\d{1,2})\s*\.?\s*(?:(Hukuk|Ceza)\s+Daire|(H|C)\.?\s?D\b\.?)", re.I)
 
 
 @dataclass(slots=True)
@@ -28,6 +28,38 @@ class KararAtfi:
     esas: str
     karar: str
     tarih: str | None
+    baglam: str = ""
+    isaret: str | None = None  # teyit | degisiklik
+
+
+# Atfın çevresindeki ifadeler. "degisiklik" bir hüküm değildir: atfın içtihat
+# değişikliği bağlamında geçtiğini söyler; yönünü avukat pasajdan okur.
+_TEYIT = re.compile(r"aynı\s+(?:yönde|doğrultuda)|yerleşik\s+(?:içtihat|uygulama|görüş)|istikrar\s+kazan|kararlılık\s+kazan", re.I)
+_DEGISIKLIK = re.compile(
+    r"içtihat\s+değişikliğ|(?:görüş|içtihad|içtihat|uygulama)\w*\s+(?:da|de|dan|den)?\s*dönül|"
+    r"(?:görüş|içtihat|uygulama)\w*\s+terk\s+edil|aksi\s+yöndeki\s+(?:görüş|içtihat|uygulama)", re.I)
+
+
+def _isaret(window: str) -> str | None:
+    if _DEGISIKLIK.search(window):
+        return "degisiklik"
+    if _TEYIT.search(window):
+        return "teyit"
+    return None
+
+
+# Yürürlükten kalkan kanunlar ve yerlerini alanlar. 1475 sayılı İş Kanunu'nun
+# yalnız 14. maddesi (kıdem tazminatı) yürürlükte.
+MULGA = {
+    "818": ("Borçlar Kanunu", "6098 sayılı Türk Borçlar Kanunu", None),
+    "743": ("Türk Kanunu Medenisi", "4721 sayılı Türk Medeni Kanunu", None),
+    "1086": ("Hukuk Usulü Muhakemeleri Kanunu", "6100 sayılı Hukuk Muhakemeleri Kanunu", None),
+    "765": ("Türk Ceza Kanunu", "5237 sayılı Türk Ceza Kanunu", None),
+    "1412": ("Ceza Muhakemeleri Usulü Kanunu", "5271 sayılı Ceza Muhakemesi Kanunu", None),
+    "6762": ("Türk Ticaret Kanunu", "6102 sayılı Türk Ticaret Kanunu", None),
+    "1475": ("İş Kanunu", "4857 sayılı İş Kanunu", {"14"}),
+    "506": ("Sosyal Sigortalar Kanunu", "5510 sayılı Sosyal Sigortalar ve Genel Sağlık Sigortası Kanunu", None),
+}
 
 
 @dataclass(slots=True)
@@ -48,6 +80,11 @@ def _court(ctx: str, own_daire: str) -> tuple[str, str | None] | None:
         ("içtihatları birleştirme", ("IBK", "İçtihadı Birleştirme")),
         ("büyük genel kurul", ("BGK", "Büyük Genel Kurul")),
         ("dairemiz", ("daire", own_daire)),
+        ("yhgk", ("HGK", "Hukuk Genel Kurulu")),
+        ("hgk", ("HGK", "Hukuk Genel Kurulu")),
+        ("ycgk", ("CGK", "Ceza Genel Kurulu")),
+        ("cgk", ("CGK", "Ceza Genel Kurulu")),
+        ("ibk", ("IBK", "İçtihadı Birleştirme")),
     ):
         i = c.rfind(kw)
         if i >= 0:
@@ -58,7 +95,8 @@ def _court(ctx: str, own_daire: str) -> tuple[str, str | None] | None:
         if "bölge" in pre or "adliye" in pre:
             cands.append((m.start(), None))
         else:
-            cands.append((m.start(), ("daire", f"{m.group(1)}. {m.group(2).title()} Dairesi")))
+            tur = m.group(2) or {"h": "Hukuk", "c": "Ceza"}[m.group(3).lower()]
+            cands.append((m.start(), ("daire", f"{m.group(1)}. {tur.title()} Dairesi")))
     for kw in ("mahkemesi", "müdürlüğü", "savcılığı", "idare"):
         i = c.rfind(kw)
         if i >= 0:
@@ -84,7 +122,9 @@ def karar_atiflari(text: str, own_daire: str) -> list[KararAtfi]:
         if (esas, karar) in seen:
             continue
         seen.add((esas, karar))
-        out.append(KararAtfi(court[0], court[1], esas, karar, m.group(1)))
+        window = text[max(0, m.start() - 250):m.end() + 150]
+        out.append(KararAtfi(court[0], court[1], esas, karar, m.group(1),
+                             baglam=re.sub(r"\s+", " ", window).strip(), isaret=_isaret(window)))
     return out
 
 

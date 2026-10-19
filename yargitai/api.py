@@ -3,11 +3,12 @@ from __future__ import annotations
 
 from dataclasses import asdict
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-from . import graph
+from . import dilekce, graph
+from .anonim import maskele
 from .answer import answer, kunye
 from .db import ROOT, connect, unpack
 from .search import Filtre, hybrid
@@ -34,7 +35,7 @@ def karar(rid: int):
     if not r:
         raise HTTPException(404)
     d = {k: r[k] for k in r.keys() if k != "metin"}
-    d["metin"] = unpack(r["metin"])
+    d["metin"] = maskele(unpack(r["metin"]))
     d["kunye"] = kunye(dict(r))
     atiflar = []
     for a in graph.cites(con, rid):
@@ -45,6 +46,7 @@ def karar(rid: int):
     d["atif_yaptigi"] = atiflar
     d["atif_alan"] = [dict(x) | {"kunye": kunye(dict(x))} for x in graph.cited_by(con, rid)]
     d["maddeler"] = [dict(x) for x in con.execute("SELECT kanun, madde FROM madde_atif WHERE rid=?", (rid,))]
+    d["durum"] = graph.durum(con, rid)
     return d
 
 
@@ -58,6 +60,27 @@ class Soru(BaseModel):
 @app.post("/api/sor")
 def sor(s: Soru):
     return answer(con, s.soru, Filtre(daire=s.daire or None, yil_min=s.yil_min, yil_max=s.yil_max))
+
+
+class Dilekce(BaseModel):
+    metin: str
+
+
+@app.post("/api/dilekce")
+def dilekce_metin(d: Dilekce):
+    return dilekce.kontrol(con, d.metin)
+
+
+@app.post("/api/dilekce/dosya")
+async def dilekce_dosya(dosya: UploadFile):
+    veri = await dosya.read()
+    if len(veri) > 15_000_000:
+        raise HTTPException(413, "Dosya 15 MB'tan büyük.")
+    try:
+        metin = dilekce.metin_cikar(dosya.filename or "", veri)
+    except Exception as e:
+        raise HTTPException(400, f"Dosya okunamadı ({e}). .udf, .docx, .pdf veya .txt yükleyin.")
+    return dilekce.kontrol(con, metin) | {"metin_uzunlugu": len(metin)}
 
 
 @app.get("/api/madde/{kanun}/{madde}")
