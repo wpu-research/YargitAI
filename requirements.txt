@@ -10,3 +10,4 @@ fastapi>=0.110
 uvicorn>=0.29
 anthropic>=0.76
 pytest>=8
+openai>=1.50
