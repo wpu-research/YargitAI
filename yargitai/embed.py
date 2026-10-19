@@ -60,7 +60,10 @@ class Encoder:
     def __init__(self, device: str | None = None):
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         self.tok = AutoTokenizer.from_pretrained(MODEL)
-        self.model = AutoModel.from_pretrained(MODEL, dtype=torch.float16 if self.device == "cuda" else torch.float32)
+        # bge-m3 deposunda yalnız .bin var; use_safetensors=False olmazsa transformers
+        # 2.3 GB'lık otomatik safetensors dönüşümünü indirmeye çalışıyor.
+        self.model = AutoModel.from_pretrained(MODEL, dtype=torch.float16 if self.device == "cuda" else torch.float32,
+                                               use_safetensors=False)
         self.model.to(self.device).eval()
 
     @torch.inference_mode()
