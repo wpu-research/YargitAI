@@ -97,7 +97,14 @@ h3{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute
     </div>
   </section>
 
-  <section id="tab-istatistik" class="hidden"><div class="stats" id="stats"></div></section>
+  <section id="tab-istatistik" class="hidden">
+    <form class="bar" id="f-madde">
+      <input type="search" id="madde-q" placeholder="Madde analizi: kanun/madde, ör. 4857/25 · 6100/370 · 5237/106">
+      <button class="btn">Analiz et</button>
+    </form>
+    <div class="card hidden" id="madde-out" style="padding:16px;margin-top:16px"></div>
+    <div class="stats" id="stats"></div>
+  </section>
 </main>
 <script>
 const $=s=>document.querySelector(s);
@@ -116,7 +123,8 @@ function chips(h){
   const out=[];
   if(h.sonuc) out.push(`<span class="chip ${h.sonuc.includes('bozma')?'bozma':'onama'}">${SONUC[h.sonuc]||h.sonuc}</span>`);
   if(/Genel Kurul|Birleştirme/.test(h.daire)) out.push('<span class="chip kurul">Kurul kararı</span>');
-  if(h.atif_alan) out.push(`<span class="chip">${h.atif_alan} kez atıf aldı</span>`);
+  const na=Array.isArray(h.atif_alan)?h.atif_alan.length:h.atif_alan;
+  if(na) out.push(`<span class="chip">${na} kez atıf aldı</span>`);
   if(h.dava_turu) out.push(`<span class="chip">${esc(h.dava_turu)}</span>`);
   return out.join(' ');
 }
@@ -202,6 +210,24 @@ async function loadStats(){
     <div class="card"><h3>En çok atıf alan kararlar</h3>${s.en_cok_atif.map(k=>`<div class="row"><span class="link" data-rid="${k.rid}">${esc(k.daire)} ${esc(k.esas_no)} E.</span><span>${k.n}</span></div>`).join('')}</div>`;
   $('#stats').querySelectorAll('.link').forEach(l=>l.onclick=()=>{$('nav button[data-tab=ara]').click();openKarar(l.dataset.rid);});
 }
+
+$('#f-madde').onsubmit=async e=>{
+  e.preventDefault();
+  const [kanun,madde]=$('#madde-q').value.trim().split('/'); if(!kanun||!madde) return;
+  const s=await (await fetch(`/api/madde/${encodeURIComponent(kanun)}/${encodeURIComponent(madde)}`)).json();
+  const years={};
+  for(const r of s.yil_sonuc){ if(!r.yil) continue; const y=years[r.yil]??={onama:0,bozma:0,diger:0};
+    const k=(r.sonuc||'').includes('bozma')?'bozma':(r.sonuc||'').includes('onama')?'onama':'diger'; y[k]+=r.n; }
+  const ys=Object.keys(years).sort(); const max=Math.max(1,...ys.map(y=>years[y].onama+years[y].bozma+years[y].diger));
+  const rows=ys.map(y=>{const v=years[y],t=v.onama+v.bozma+v.diger;
+    return `<div class="row"><span>${y}</span><span>${t.toLocaleString('tr')} karar · bozma %${t?Math.round(100*v.bozma/t):0}</span></div>
+    <div style="display:flex;height:10px;width:${100*t/max}%;border-radius:4px;overflow:hidden">
+      <div style="flex:${v.onama};background:var(--ok)"></div><div style="flex:${v.bozma};background:var(--bad)"></div><div style="flex:${v.diger};background:var(--line)"></div></div>`;}).join('');
+  $('#madde-out').classList.remove('hidden');
+  $('#madde-out').innerHTML=`<h3>${esc(kanun)} sayılı Kanun m.${esc(madde)} · ${s.toplam.toLocaleString('tr')} karar</h3>
+    <div class="meta"><span class="chip onama">onama</span><span class="chip bozma">bozma</span><span class="chip">diğer</span></div>${rows||'<div class="meta">Bu maddeye dayanan karar yok.</div>'}
+    <h3>Daireler</h3>${s.daire.map(d=>`<div class="row"><span>${esc(d.daire)}</span><span>${d.n.toLocaleString('tr')}</span></div>`).join('')}`;
+};
 
 fetch('/api/istatistik').then(r=>r.json()).then(s=>{
   $('#daire').innerHTML+=s.daireler.map(d=>`<option>${esc(d)}</option>`).join('');

@@ -7,8 +7,10 @@ PY=.venv/bin/python
 log() { echo "$(date '+%F %T') $*" >> logs/gece_hatti.log; }
 
 log "başladı; ingest bekleniyor"
-while pgrep -f "yargitai.ingest_hf" >/dev/null; do sleep 60; done
-log "ingest bitti; atıf grafiği çözülüyor"
+while pgrep -f "^[^ ]*python[^ ]* -m yargitai\.ingest_hf" >/dev/null; do sleep 60; done
+log "ingest bitti; atıflar güncel kodla yeniden çıkarılıyor"
+$PY -m yargitai.graph reextract >> logs/graph.log 2>&1
+log "atıf grafiği çözülüyor"
 $PY -m yargitai.graph resolve >> logs/graph.log 2>&1
 log "graf tamam; embedding modeli bekleniyor"
 until grep -q '^OK' logs/model_download.log 2>/dev/null; do sleep 60; done

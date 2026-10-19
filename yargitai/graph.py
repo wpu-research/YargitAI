@@ -77,9 +77,38 @@ def madde_istatistik(con: sqlite3.Connection, kanun: str, madde: str) -> dict:
     }
 
 
+def reextract(con: sqlite3.Connection, batch: int = 5000) -> None:
+    """Çıkarım kodu değiştiğinde tüm kararların atıflarını saklı metinden yeniden üretir."""
+    from . import extract, parse
+    from .db import unpack
+    last = 0
+    while True:
+        rows = con.execute("SELECT rid, daire, metin FROM karar WHERE rid > ? ORDER BY rid LIMIT ?",
+                           (last, batch)).fetchall()
+        if not rows:
+            break
+        rids = [r[0] for r in rows]
+        ph = ",".join("?" * len(rids))
+        con.execute(f"DELETE FROM atif WHERE kaynak_rid IN ({ph})", rids)
+        con.execute(f"DELETE FROM madde_atif WHERE rid IN ({ph})", rids)
+        for rid, daire, blob in rows:
+            text = unpack(blob)
+            con.executemany(
+                "INSERT INTO atif(kaynak_rid, tur, hedef_daire, esas_no, karar_no, tarih) VALUES(?,?,?,?,?,?)",
+                [(rid, a.tur, a.daire, a.esas, a.karar, parse.parse_date(a.tarih))
+                 for a in extract.karar_atiflari(text, daire)])
+            con.executemany("INSERT OR IGNORE INTO madde_atif(rid, kanun, madde) VALUES(?,?,?)",
+                            [(rid, m.kanun, m.madde) for m in extract.madde_atiflari(text)])
+        con.commit()
+        last = rids[-1]
+        log.info("yeniden çıkarım: rid %d'e kadar", last)
+
+
 if __name__ == "__main__":
     from .db import connect
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
+    if sys.argv[1:] == ["reextract"]:
+        reextract(connect())
     if sys.argv[1:] == ["resolve"]:
         c = connect()
         log.info("%d atıf çözüldü", resolve(c))

@@ -156,7 +156,10 @@ def hybrid(con: sqlite3.Connection, q: str, f: Filtre | None = None, k: int = 20
     f = f or Filtre()
     lists: dict[str, list[tuple[int, float]]] = {"bm25": bm25(con, q, f)}
     if use_vectors:
-        lists["vektor"] = VEC.search(q, allowed=_allowed(con, f))
+        try:
+            lists["vektor"] = VEC.search(q, allowed=_allowed(con, f))
+        except Exception as e:  # vektör katmanı düşerse BM25 ile devam
+            log.warning("vektör araması atlandı: %s", e)
     fused: dict[int, float] = {}
     src: dict[int, list[str]] = {}
     for name, lst in lists.items():

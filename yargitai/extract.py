@@ -96,7 +96,7 @@ KISALTMA = {
 _KANUN_NO = re.compile(r"\b(\d{3,4})\s+sayılı\b", re.I)
 _KISA = re.compile(r"\b(TBK|TMK|HMK|CMK|TCK|İİK|TTK|HUMK|CMUK|BK|AAK|KMK|TKHK|İYUK)\b")
 _MADDE = re.compile(
-    r"(\d{1,4})(?:/\d{1,2})?(?:-[a-zçğışöü])?\s*(?:\.|'?\s*(?:inci|ıncı|nci|ncı|üncü|uncu|nın|nin|nun|nün|ün|in|ın|un))?\s*madde",
+    r"(?<![\d/-])(\d{1,4})(?:\s*/\s*(?:\d{1,2}|[IVX]{1,5}))?(?:\s*-\s*(?:[a-zçğışöü]|\d{1,2})(?![a-zçğışöü]))*\s*(?:\.|'?\s*(?:inci|ıncı|nci|ncı|üncü|uncu|nın|nin|nun|nün|ün|in|ın|un))?\s*madde",
     re.I,
 )
 
