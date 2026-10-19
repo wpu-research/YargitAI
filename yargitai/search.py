@@ -71,7 +71,13 @@ def bm25(con: sqlite3.Connection, q: str, f: Filtre, k: int = 100) -> list[tuple
               JOIN karar k ON k.rid = karar_fts.rowid
               WHERE karar_fts MATCH ? {where} ORDER BY s LIMIT ?"""
     try:
-        return [(r[0], -r[1]) for r in con.execute(sql, [fq, *params, k])]
+        hits = [(r[0], -r[1]) for r in con.execute(sql, [fq, *params, k])]
+        # Tüm terimleri içeren karar azsa, terimlerden herhangi birini içerenlerle tamamla.
+        if len(hits) < k // 5 and " AND " in fq:
+            seen = {h[0] for h in hits}
+            hits += [(r[0], -r[1]) for r in con.execute(sql, [fq.replace(" AND ", " OR "), *params, k])
+                     if r[0] not in seen]
+        return hits[:k]
     except sqlite3.OperationalError as e:
         log.warning("FTS sorgu hatası %r: %s", fq, e)
         return []
