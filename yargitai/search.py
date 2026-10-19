@@ -61,6 +61,7 @@ class Sonuc:
     snippet: str = ""
     atif_alan: int = 0
     kaynaklar: list[str] = field(default_factory=list)
+    seri: int = 1  # aynı şablondan çıkan karar sayısı (kendisi dahil)
 
 
 MAX_TERIM = 12
@@ -202,17 +203,36 @@ def hybrid(con: sqlite3.Connection, q: str, f: Filtre | None = None, k: int = 20
             src.setdefault(rid, []).append(name)
     if not fused:
         return []
-    cand = sorted(fused, key=lambda r: -fused[r])[: k * 2]
-    atif = graph.atif_sayisi(con, cand)
-    # Otorite: kurul kararı ve çok atıf alan karar hafifçe öne çıkar.
+    cand = sorted(fused, key=lambda r: -fused[r])[: k * 5]
     rows = {r["rid"]: r for r in con.execute(
-        f"SELECT rid, daire, daire_turu, esas_no, karar_no, karar_tarihi, sonuc, dava_turu, metin "
+        f"SELECT rid, daire, daire_turu, esas_no, karar_no, karar_tarihi, sonuc, dava_turu, imza "
         f"FROM karar WHERE rid IN ({','.join('?' * len(cand))})", cand)}
-    out = []
+    # Seri davalar: aynı şablondan çıkan kararlardan yalnız en iyi sıradaki gösterilir.
+    temsil: dict[str, int] = {}
+    secilen = []
     for rid in cand:
+        im = rows[rid]["imza"] or f"rid:{rid}"
+        if im in temsil:
+            continue
+        temsil[im] = rid
+        secilen.append(rid)
+    secilen = secilen[: k * 2]
+    imzalar = [rows[r]["imza"] for r in secilen if rows[r]["imza"]]
+    seri = dict(con.execute(
+        f"SELECT imza, COUNT(*) FROM karar WHERE imza IN ({','.join('?' * len(imzalar))}) GROUP BY imza",
+        imzalar).fetchall()) if imzalar else {}
+    atif = graph.atif_sayisi(con, secilen)
+    out = []
+    for rid in secilen:
         r = rows[rid]
+        # Otorite: kurul kararı ve çok atıf alan karar hafifçe öne çıkar.
         s = fused[rid] * (1.15 if r["daire_turu"] == "kurul" else 1.0) * (1 + 0.05 * np.log1p(atif.get(rid, 0)))
         out.append(Sonuc(rid, s, r["daire"], r["esas_no"], r["karar_no"], r["karar_tarihi"], r["sonuc"],
-                         r["dava_turu"], snippet(maskele(unpack(r["metin"])), q), atif.get(rid, 0), src[rid]))
+                         r["dava_turu"], "", atif.get(rid, 0), src[rid], seri.get(r["imza"], 1)))
     out.sort(key=lambda x: -x.skor)
-    return out[:k]
+    out = out[:k]
+    metin = dict(con.execute(f"SELECT rid, metin FROM karar WHERE rid IN ({','.join('?' * len(out))})",
+                             [o.rid for o in out]).fetchall()) if out else {}
+    for o in out:
+        o.snippet = snippet(maskele(unpack(metin[o.rid])), q)
+    return out

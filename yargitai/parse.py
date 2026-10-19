@@ -1,6 +1,7 @@
 """Ham karar HTML'ini temiz metne ve üst veriye çevirir."""
 from __future__ import annotations
 
+import hashlib
 import html
 import re
 from datetime import date
@@ -29,6 +30,18 @@ _SONUC = [
     ("temyiz_ret", re.compile(r"temyiz\s+(?:isteminin|dilekçesinin|başvurusunun)\s+reddine", re.I)),
     ("kaldirma", re.compile(r"kaldırılmasına", re.I)),
 ]
+
+
+_IMZA_NORM = re.compile(r"[^a-zçğıöşü]+")
+
+
+def imza(text: str) -> str:
+    """Seri davaları tanımak için metin imzası: rakam, noktalama ve maskeler atılır.
+
+    Aynı şablondan çıkan kararlar (yalnız tarih, tutar, dosya no farklı) aynı imzayı alır.
+    """
+    from .textnorm import fold
+    return hashlib.md5(_IMZA_NORM.sub("", fold(text)).encode()).hexdigest()[:16]
 
 
 def html_to_text(raw: str) -> str:

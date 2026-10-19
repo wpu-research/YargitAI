@@ -77,8 +77,13 @@ def build(n: int, seed: int = 7) -> None:
     print(f"{len(out)} sorgu yazıldı → eval/gumus.jsonl")
 
 
-def _rank(hits: list[int], gold: int) -> int | None:
-    return hits.index(gold) + 1 if gold in hits else None
+def _rank(hits: list[int], gold: int, imza: dict[int, str | None]) -> int | None:
+    """Hedefin kendisi ya da birebir aynı metinli (seri dava) kopyası isabet sayılır."""
+    g = imza.get(gold)
+    for i, h in enumerate(hits, 1):
+        if h == gold or (g and imza.get(h) == g):
+            return i
+    return None
 
 
 def run(k: int = 10) -> dict:
@@ -88,6 +93,14 @@ def run(k: int = 10) -> dict:
     for it in items:
         it["ilgili"] = {it["hedef"]} | {r[0] for r in con.execute(
             "SELECT kaynak_rid FROM atif WHERE hedef_rid=?", (it["hedef"],))} - {it["kaynak"]}
+    imza: dict[int, str | None] = {}
+
+    def imzalar(rids):
+        eksik = [r for r in rids if r not in imza]
+        if eksik:
+            imza.update(con.execute(f"SELECT rid, imza FROM karar WHERE rid IN ({','.join('?' * len(eksik))})",
+                                    eksik).fetchall())
+    imzalar([it["hedef"] for it in items])
     VEC.load()
     modes = {
         "bm25": lambda q: [r for r, _ in bm25(con, q, Filtre(), k=k + 1)],
@@ -99,7 +112,8 @@ def run(k: int = 10) -> dict:
         ranks, ortak, t0 = [], [], time.time()
         for it in items:
             hits = [h for h in fn(it["sorgu"]) if h != it["kaynak"]][:k]  # sorgunun alındığı kararı sayma
-            ranks.append(_rank(hits, it["hedef"]))
+            imzalar(hits)
+            ranks.append(_rank(hits, it["hedef"], imza))
             ortak.append((any(h in it["ilgili"] for h in hits[:5]), sum(h in it["ilgili"] for h in hits[:10]) / 10))
             if len(ranks) % 100 == 0:
                 print(f"  {name}: {len(ranks)}/{len(items)}", flush=True)

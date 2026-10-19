@@ -140,9 +140,27 @@ def reextract(con: sqlite3.Connection, batch: int = 5000) -> None:
         log.info("yeniden çıkarım: rid %d'e kadar", last)
 
 
+def imzala(con: sqlite3.Connection, batch: int = 5000) -> None:
+    """İmzası olmayan kararlara seri dava imzası yazar (artımlı)."""
+    from .db import unpack
+    from .parse import imza
+    last = 0
+    while True:
+        rows = con.execute("SELECT rid, metin FROM karar WHERE rid > ? AND imza IS NULL ORDER BY rid LIMIT ?",
+                           (last, batch)).fetchall()
+        if not rows:
+            break
+        con.executemany("UPDATE karar SET imza=? WHERE rid=?", [(imza(unpack(m)), r) for r, m in rows])
+        con.commit()
+        last = rows[-1][0]
+        log.info("imza: rid %d'e kadar", last)
+
+
 if __name__ == "__main__":
     from .db import connect
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
+    if sys.argv[1:] == ["imza"]:
+        imzala(connect())
     if sys.argv[1:] == ["reextract"]:
         reextract(connect())
     if sys.argv[1:] == ["resolve"]:

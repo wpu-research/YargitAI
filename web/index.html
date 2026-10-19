@@ -143,6 +143,7 @@ function chips(h){
   if(/Genel Kurul|Birleştirme/.test(h.daire)) out.push('<span class="chip kurul">Kurul kararı</span>');
   const na=Array.isArray(h.atif_alan)?h.atif_alan.length:h.atif_alan;
   if(na) out.push(`<span class="chip">${na} kez atıf aldı</span>`);
+  if(h.seri>1) out.push(`<span class="chip" title="Aynı şablondan çıkmış, yalnız tarih, tutar ve dosya numarası farklı kararlar">Seri dava: ${h.seri.toLocaleString('tr')} benzer karar</span>`);
   if(h.dava_turu) out.push(`<span class="chip">${esc(h.dava_turu)}</span>`);
   return out.join(' ');
 }

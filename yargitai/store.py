@@ -37,6 +37,7 @@ def upsert(con: sqlite3.Connection, *, kaynak: str, kaynak_id: str, daire: str,
          f["ilk_derece"] or f["mahkeme"], parse.sonuc(text), len(text), pack(text)),
     )
     rid = cur.lastrowid
+    con.execute("UPDATE karar SET imza=? WHERE rid=?", (parse.imza(text), rid))
     con.execute("INSERT INTO karar_fts(rowid, metin) VALUES(?, ?)",
                 (rid, fold(daire + "\n" + text)))
     atiflar = extract.karar_atiflari(text, daire)

@@ -76,3 +76,19 @@ def test_llm_refusal_falls_back_to_extractive(con, fake_anthropic, monkeypatch):
     r = answer.answer(con, "fazla çalışma tanık hakkaniyet indirimi")
     assert r["mod"] == "cikarimsal"
     assert "[K1]" in r["cevap"]
+
+
+def test_seri_davalar_tek_satir(monkeypatch):
+    from yargitai import search
+    from yargitai.parse import imza
+    _no_vectors(monkeypatch)
+    c = sqlite3.connect(":memory:", check_same_thread=False)
+    c.row_factory = sqlite3.Row
+    c.executescript(SCHEMA)
+    metinler = [METIN.replace("Fazla", f"{n} TL fazla") for n in (100, 250, 999)] + ["Kıdem tazminatı tanık ispat hakkaniyet farklı bir karar."]
+    for i, m in enumerate(metinler):
+        cur = c.execute("INSERT INTO karar(kaynak,kaynak_id,daire,daire_turu,esas_no,karar_no,metin,imza) VALUES('t',?,?,?,?,?,?,?)",
+                        (str(i), "9. Hukuk Dairesi", "hukuk", f"2023/{i}", f"2023/{i + 10}", pack(m), imza(m)))
+        c.execute("INSERT INTO karar_fts(rowid, metin) VALUES(?,?)", (cur.lastrowid, fold(m)))
+    hits = search.hybrid(c, "tanık hakkaniyet", k=10)
+    assert sorted(h.seri for h in hits) == [1, 3]

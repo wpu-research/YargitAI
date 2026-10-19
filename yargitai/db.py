@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS karar (
     sonuc TEXT,
     uzunluk INTEGER,
     metin BLOB NOT NULL,             -- zstd(utf-8)
+    imza TEXT,                       -- seri dava imzası (parse.imza)
     eklendi TEXT NOT NULL DEFAULT (datetime('now')),
     UNIQUE (kaynak, kaynak_id)
 );
@@ -84,6 +85,9 @@ def connect(path: Path | str = DB_PATH) -> sqlite3.Connection:
     con.execute("PRAGMA synchronous=NORMAL")
     con.execute("PRAGMA cache_size=-200000")
     con.executescript(SCHEMA)
+    if "imza" not in {r[1] for r in con.execute("PRAGMA table_info(karar)")}:
+        con.execute("ALTER TABLE karar ADD COLUMN imza TEXT")
+    con.execute("CREATE INDEX IF NOT EXISTS karar_imza ON karar(imza)")
     cols = {r[1] for r in con.execute("PRAGMA table_info(atif)")}
     for col in ("baglam", "isaret"):
         if col not in cols:  # eski veritabanlarını göç ettir
