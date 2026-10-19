@@ -84,6 +84,10 @@ def _rank(hits: list[int], gold: int) -> int | None:
 def run(k: int = 10) -> dict:
     con = connect()
     items = [json.loads(l) for l in open(EVAL / "gumus.jsonl")]
+    # Atıf ortaklığı: hedefin kendisi ya da aynı hedefe atıf yapan kararlar ilgili sayılır.
+    for it in items:
+        it["ilgili"] = {it["hedef"]} | {r[0] for r in con.execute(
+            "SELECT kaynak_rid FROM atif WHERE hedef_rid=?", (it["hedef"],))} - {it["kaynak"]}
     VEC.load()
     modes = {
         "bm25": lambda q: [r for r, _ in bm25(con, q, Filtre(), k=k + 1)],
@@ -92,24 +96,30 @@ def run(k: int = 10) -> dict:
     }
     report = {}
     for name, fn in modes.items():
-        ranks, t0 = [], time.time()
+        ranks, ortak, t0 = [], [], time.time()
         for it in items:
             hits = [h for h in fn(it["sorgu"]) if h != it["kaynak"]][:k]  # sorgunun alındığı kararı sayma
             ranks.append(_rank(hits, it["hedef"]))
+            ortak.append((any(h in it["ilgili"] for h in hits[:5]), sum(h in it["ilgili"] for h in hits[:10]) / 10))
+            if len(ranks) % 100 == 0:
+                print(f"  {name}: {len(ranks)}/{len(items)}", flush=True)
         n = len(ranks)
         report[name] = {
             "recall@1": sum(1 for r in ranks if r == 1) / n,
             "recall@5": sum(1 for r in ranks if r and r <= 5) / n,
             "recall@10": sum(1 for r in ranks if r) / n,
             "mrr@10": sum(1 / r for r in ranks if r) / n,
+            "ortak_hit@5": sum(o[0] for o in ortak) / n,
+            "ortak_p@10": sum(o[1] for o in ortak) / n,
             "ms_sorgu": 1000 * (time.time() - t0) / n,
         }
     report["n"] = len(items)
     (EVAL / "sonuc.json").write_text(json.dumps(report, indent=2, ensure_ascii=False))
-    print(f"{'mod':8} {'R@1':>6} {'R@5':>6} {'R@10':>6} {'MRR':>6} {'ms':>6}   (n={len(items)})")
+    print(f"{'mod':8} {'R@1':>6} {'R@5':>6} {'R@10':>6} {'MRR':>6} {'O-H@5':>6} {'O-P@10':>6} {'ms':>6}   (n={len(items)})")
     for name in modes:
         m = report[name]
-        print(f"{name:8} {m['recall@1']:6.3f} {m['recall@5']:6.3f} {m['recall@10']:6.3f} {m['mrr@10']:6.3f} {m['ms_sorgu']:6.0f}")
+        print(f"{name:8} {m['recall@1']:6.3f} {m['recall@5']:6.3f} {m['recall@10']:6.3f} {m['mrr@10']:6.3f} "
+              f"{m['ortak_hit@5']:6.3f} {m['ortak_p@10']:6.3f} {m['ms_sorgu']:6.0f}")
     return report
 
 

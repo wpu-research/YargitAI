@@ -12,7 +12,7 @@ import numpy as np
 from . import graph
 from .anonim import maskele
 from .db import unpack
-from .textnorm import fold, fts_query, stem, tokens
+from .textnorm import fold, fts_from, sorgu_terimleri, stem, tokens
 
 log = logging.getLogger("search")
 RRF_K = 60
@@ -63,8 +63,35 @@ class Sonuc:
     kaynaklar: list[str] = field(default_factory=list)
 
 
+MAX_TERIM = 12
+_DF: dict[str, int] = {}
+
+
+def _df(con: sqlite3.Connection, st: str) -> int:
+    if st not in _DF:
+        con.execute("CREATE VIRTUAL TABLE IF NOT EXISTS karar_fts_v USING fts5vocab(karar_fts, row)")
+        _DF[st] = con.execute("SELECT COALESCE(SUM(doc),0) FROM karar_fts_v WHERE term >= ? AND term < ?",
+                              (st, st + "\uffff")).fetchone()[0]
+    return _DF[st]
+
+
+def secili_terimler(con: sqlite3.Connection, q: str) -> tuple[list[str], list[str]]:
+    """Uzun sorgularda (dilekçe paragrafı, önerme) yalnız en ayırt edici kökler tutulur.
+
+    70 terimlik bir önek araması bir milyon kararda ~30 sn sürüyor; en nadir 12 kök
+    hem hızı hem isabeti korur. Hiç geçmeyen kökler (yazım hatası) atılır.
+    """
+    phrases, stems = sorgu_terimleri(q)
+    if len(stems) <= MAX_TERIM:
+        return phrases, stems
+    scored = [(d, s) for s in stems if (d := _df(con, s)) > 0]
+    keep = {s for _, s in sorted(scored)[:MAX_TERIM]}
+    return phrases, [s for s in stems if s in keep]
+
+
 def bm25(con: sqlite3.Connection, q: str, f: Filtre, k: int = 100) -> list[tuple[int, float]]:
-    fq = fts_query(q)
+    phrases, stems = secili_terimler(con, q)
+    fq = fts_from(phrases, stems)
     if not fq:
         return []
     where, params = f.sql()
@@ -119,7 +146,7 @@ class VectorIndex:
         if not self.load():
             return []
         import torch
-        qv = torch.from_numpy(self.enc.encode([q], max_len=128)).to(self.mat.device).to(self.mat.dtype)
+        qv = torch.from_numpy(self.enc.encode([q], max_len=512)).to(self.mat.device).to(self.mat.dtype)
         sims = (self.mat @ qv[0]).float()
         top = torch.topk(sims, min(len(sims), k * 6))
         best: dict[int, float] = {}

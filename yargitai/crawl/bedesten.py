@@ -96,7 +96,7 @@ class Bedesten:
 
     def search(self, *, phrase: str = "", item_type: str = "YARGITAYKARARI",
                start: date | None = None, end: date | None = None,
-               page: int = 1, page_size: int = 100) -> tuple[list[Hit], int]:
+               page: int = 1, page_size: int = 100, birim: str | None = None) -> tuple[list[Hit], int]:
         data: dict = {
             "pageSize": page_size,
             "pageNumber": page,
@@ -105,6 +105,8 @@ class Bedesten:
             "sortFields": ["KARAR_TARIHI"],
             "sortDirection": "desc",
         }
+        if birim:
+            data["birimAdi"] = birim
         if start:
             data["kararTarihiStart"] = f"{start.isoformat()}T00:00:00.000Z"
         if end:

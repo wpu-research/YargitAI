@@ -59,6 +59,9 @@ h3{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute
 .row{display:flex;justify-content:space-between;gap:8px;font-size:14px;padding:3px 0}
 .barv{height:8px;background:var(--gold);border-radius:4px;margin-top:2px}
 .hidden{display:none}
+.fb{display:flex;gap:6px;margin-top:8px}
+.fb button{font:inherit;font-size:12px;padding:3px 10px;border-radius:99px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer}
+.fb button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 </style>
 </head>
 <body>
@@ -146,7 +149,8 @@ function chips(h){
 
 function hitHtml(h){
   return `<div class="hit" data-rid="${h.rid}"><div class="kunye">${esc(h.kunye)}</div>
-    <div class="meta">${chips(h)}</div><div class="snip">${highlight(esc(h.snippet))}</div></div>`;
+    <div class="meta">${chips(h)}</div><div class="snip">${highlight(esc(h.snippet))}</div>
+    <div class="fb"><button type="button" data-p="1">İşe yaradı</button><button type="button" data-p="-1">İlgisiz</button></div></div>`;
 }
 
 function highlight(html){
@@ -174,6 +178,12 @@ $('#f-ara').onsubmit=async e=>{
 };
 
 function bindHits(sel){
+  document.querySelectorAll(sel+' .fb button').forEach(b=>b.onclick=async ev=>{
+    ev.stopPropagation();
+    const rid=+b.closest('.hit').dataset.rid;
+    b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+    await fetch('/api/geri-bildirim',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sorgu:lastQ||'',rid,puan:+b.dataset.p})});
+  });
   document.querySelectorAll(sel+' .hit').forEach(el=>el.onclick=()=>{
     document.querySelectorAll('.hit.sel').forEach(x=>x.classList.remove('sel'));
     el.classList.add('sel'); openKarar(el.dataset.rid);
@@ -191,14 +201,14 @@ async function openKarar(rid){
   const ab=d.atif_alan.map(a=>`<div class="row"><span class="link" data-rid="${a.rid}">${esc(a.kunye)}</span><span class="chip">${SONUC[a.sonuc]||''}</span></div>`).join('')||'<div class="meta">Henüz atıf alan karar yok.</div>';
   const md=d.maddeler.map(m=>`<span class="chip">${m.kanun}${m.madde?' m.'+m.madde:''}</span>`).join(' ');
   const du=d.durum, dn=[];
-  du.mulga.forEach(m=>dn.push(`<div class="warn"><b>Mülga kanun:</b> Karar ${m.kanun} sayılı ${esc(m.ad)}'na dayanıyor. Yerini ${esc(m.yerine)} aldı; güncel karşılığını kontrol edin.</div>`));
+  du.mulga.forEach(m=>dn.push(`<div class="meta" style="margin:6px 0"><span class="chip">Mülga kanun</span> Karar ${m.kanun} sayılı ${esc(m.ad)}'na atıf yapıyor; olay tarihine ya da geçiş hükümlerine göre uygulanmış olabilir. Güncel karşılığı: ${esc(m.yerine)}.</div>`));
   du.degisiklik.forEach(x=>dn.push(`<div class="warn"><b>İçtihat değişikliği bağlamında atıf:</b> <span class="link" data-rid="${x.rid}">${esc(x.kunye)}</span><div class="meta" style="margin-top:4px">…${esc(x.baglam)}…</div></div>`));
   const guncel=du.atif_toplam?`${du.atif_toplam} kez atıf aldı · son atıf ${du.son_atif_yili||'?'}${du.kurul_atfi?` · ${du.kurul_atfi} kurul atfı`:''}${du.teyit?` · ${du.teyit} teyit`:''}`:'Veritabanında bu karara atıf yapan karar yok.';
-  $('#detail').innerHTML=`<h2>${esc(d.kunye)}</h2><div class="meta">${chips(d)}</div>
+  $('#detail').innerHTML=`<h2>${esc(d.kunye)}</h2><div class="meta">${chips({...d,atif_alan:du.atif_toplam})}</div>
     <h3>Güncellik</h3><div class="meta">${guncel}</div>${dn.join('')}
     <h3>Dayandığı kanun maddeleri</h3><div>${md||'<span class="meta">—</span>'}</div>
     <h3>Atıf yaptığı kararlar</h3>${at}
-    <h3>Bu karara atıf yapanlar</h3>${ab}
+    <h3>Bu karara atıf yapanlar${du.atif_toplam>d.atif_alan.length?` <span class="meta">(son ${d.atif_alan.length}, toplam ${du.atif_toplam})</span>`:''}</h3>${ab}
     <div class="metin">${highlight(esc(d.metin))}</div>`;
   $('#detail').scrollTop=0;
   $('#detail').querySelectorAll('.link').forEach(l=>l.onclick=()=>openKarar(l.dataset.rid));

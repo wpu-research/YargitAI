@@ -96,7 +96,8 @@ def durum(con: sqlite3.Connection, rid: int) -> dict:
         "kurul_atfi": ozet[2] or 0,
         "teyit": ozet[3] or 0,
         "degisiklik": degisiklik,
-        "seviye": "dikkat" if (mulga or degisiklik) else "bilgi",
+        # Mülga kanun atfı tek başına sorun değildir (geçiş hükümleri, olay tarihi): yalnız bilgi.
+        "seviye": "dikkat" if degisiklik else "bilgi",
     }
 
 

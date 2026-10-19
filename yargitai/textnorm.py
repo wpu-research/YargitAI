@@ -35,6 +35,29 @@ def stem(tok: str) -> str:
     return _stemmer.stemWord(tok)
 
 
+def sorgu_terimleri(q: str) -> tuple[list[str], list[str]]:
+    """(tam ifadeler, kök terimler) — sırayı korur, tekrarları atar."""
+    phrases = []
+    for phrase in re.findall(r'"([^"]+)"', q):
+        toks = [fold(t) for t in tokens(phrase)]
+        if toks:
+            phrases.append(" ".join(toks))
+    stems: list[str] = []
+    for t in tokens(re.sub(r'"[^"]*"', " ", q)):
+        if t in STOP or len(t) < 2:
+            continue
+        st = fold(stem(t)) if not t.isdigit() else t
+        if len(st) < 3:
+            st = fold(t)
+        if st not in stems:
+            stems.append(st)
+    return phrases, stems
+
+
+def fts_from(phrases: list[str], stems: list[str], op: str = "AND") -> str:
+    return f" {op} ".join([f'"{p}"' for p in phrases] + [f'"{s}"*' for s in stems])
+
+
 def fts_query(q: str) -> str:
     """Kullanıcı sorgusunu FTS5 sorgusuna çevirir.
 

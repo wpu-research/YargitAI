@@ -22,11 +22,11 @@ log = logging.getLogger("crawl")
 KAYNAK = "bedesten"
 
 
-def crawl_day(api: Bedesten, con, day: date, item_type: str) -> int:
+def crawl_day(api: Bedesten, con, day: date, item_type: str, birim: str | None = None) -> int:
     added = 0
     page = 1
     while True:
-        hits, total = api.search(item_type=item_type, start=day, end=day, page=page, page_size=100)
+        hits, total = api.search(item_type=item_type, start=day, end=day, page=page, page_size=100, birim=birim)
         for h in hits:
             if con.execute("SELECT 1 FROM karar WHERE kaynak=? AND kaynak_id=?",
                            (KAYNAK, h.document_id)).fetchone():
@@ -46,14 +46,14 @@ def crawl_day(api: Bedesten, con, day: date, item_type: str) -> int:
         page += 1
 
 
-def run(since: date, until: date, item_type: str) -> None:
+def run(since: date, until: date, item_type: str, birim: str | None = None) -> None:
     api = Bedesten()
     con = connect()
     for day in days(since, until):
-        key = f"bedesten:{item_type}:{day.isoformat()}"
+        key = f"bedesten:{item_type}:{birim or '*'}:{day.isoformat()}"
         if get_state(con, key) == "done" and day < date.today():
             continue
-        n = crawl_day(api, con, day, item_type)
+        n = crawl_day(api, con, day, item_type, birim)
         set_state(con, key, "done")
         con.commit()
         log.info("%s %s: %d yeni karar", item_type, day, n)
@@ -64,18 +64,19 @@ def main() -> None:
     ap.add_argument("--since", type=date.fromisoformat, default=date(2024, 1, 1))
     ap.add_argument("--until", type=date.fromisoformat, default=date.today())
     ap.add_argument("--item-type", default="YARGITAYKARARI")
+    ap.add_argument("--birim", help='yalnız bu birim, ör. "Hukuk Genel Kurulu"')
     ap.add_argument("--watch", action="store_true", help="servis kapalıysa 15 dk'da bir yokla")
     args = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
     logging.getLogger("httpx").setLevel(logging.WARNING)
     while True:
         try:
-            run(args.since, args.until, args.item_type)
+            run(args.since, args.until, args.item_type, args.birim)
             return
-        except ServiceDown as e:
+        except (ServiceDown, RuntimeError) as e:  # kapalı servis ya da tükenen ağ denemeleri
             if not args.watch:
                 raise SystemExit(f"Servis kapalı: {e}")
-            log.warning("Servis kapalı (%s); 15 dk sonra tekrar denenecek", e)
+            log.warning("Servis kapalı ya da erişilemiyor (%s); 15 dk sonra tekrar denenecek", e)
             time.sleep(900)
         except UnexpectedShape as e:
             # API şekli değişmiş: yanlış veri yazmaktansa dur ve ham yanıtı bırak.
