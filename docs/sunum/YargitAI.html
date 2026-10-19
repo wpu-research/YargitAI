@@ -2,888 +2,756 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
 <style>
-/* Layout: 16:9 slaytlar sahnede tek tek; dar ekranda dikey akış. Mürekkep lacivert zemin, altın vurgu, bordo uyarı. */
+/* Layout: tek sayfa, tam genişlik bantlar; açılışta canlı künye doğrulama demosu, sonra problem → pazar → rekabet → çözüm → veri → model → yol haritası. */
 :root{
-  --ground:#E6E9EF;
-  --paper:#FBFAF7;
-  --ink:#14203A;
-  --ink-2:#4B5672;
-  --rule:#D3D8E2;
-  --gold:#94701F;
-  --gold-soft:#EEE3C6;
-  --claret:#7D2335;
-  --claret-soft:#F3DDE2;
-  --navy:#16233F;
-  --on-navy:#F2EDE0;
-  --on-navy-2:#B9C0D2;
-  --gold-on-navy:#D9B76C;
-  --serif:"Cormorant Garamond","Iowan Old Style","Palatino Linotype",Georgia,serif;
-  --sans:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --paper:#F5F8F8; --surface:#FFFFFF; --ink:#0D1B22; --ink-2:#4A5B63; --line:#D8E2E3;
+  --petrol:#0C3F48; --petrol-2:#0F5562; --on-petrol:#EAF6F4; --on-petrol-2:#9CC3C2;
+  --mint:#14A889; --mint-soft:#D6F3EC; --mint-on-dark:#4BE0BE;
+  --stamp:#D9452B; --stamp-soft:#FBE3DD; --manila:#E9A915; --manila-soft:#FCF0CF;
+  --display:"Young Serif","Iowan Old Style",Georgia,serif;
+  --sans:"Figtree","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --shadow:0 1px 2px rgb(12 63 72 / .06),0 10px 30px rgb(12 63 72 / .08);
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --ground:#060A14;--paper:#0F1729;--ink:#E9E6DD;--ink-2:#A2AABD;--rule:#27324C;
-    --gold:#D6B46A;--gold-soft:#3A3120;--claret:#E08A9A;--claret-soft:#3B1C25;
-    --navy:#0A1224;--on-navy:#F2EDE0;--on-navy-2:#A9B1C4;--gold-on-navy:#D9B76C;
-    color-scheme:dark;
-  }
-}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#091519; --surface:#0F2026; --ink:#E6F1F0; --ink-2:#9DB2B5; --line:#1F363D;
+  --petrol:#06252B; --petrol-2:#0B3540; --on-petrol:#EAF6F4; --on-petrol-2:#8FB7B6;
+  --mint:#3DD6B3; --mint-soft:#0F3A33; --mint-on-dark:#4BE0BE;
+  --stamp:#FF7A5C; --stamp-soft:#3B1D18; --manila:#F4C04A; --manila-soft:#3A2F12;
+  --shadow:none; color-scheme:dark;}}
 :root[data-theme="dark"]{
-  --ground:#060A14;--paper:#0F1729;--ink:#E9E6DD;--ink-2:#A2AABD;--rule:#27324C;
-  --gold:#D6B46A;--gold-soft:#3A3120;--claret:#E08A9A;--claret-soft:#3B1C25;
-  --navy:#0A1224;--on-navy:#F2EDE0;--on-navy-2:#A9B1C4;--gold-on-navy:#D9B76C;
-  color-scheme:dark;
-}
+  --paper:#091519; --surface:#0F2026; --ink:#E6F1F0; --ink-2:#9DB2B5; --line:#1F363D;
+  --petrol:#06252B; --petrol-2:#0B3540; --on-petrol:#EAF6F4; --on-petrol-2:#8FB7B6;
+  --mint:#3DD6B3; --mint-soft:#0F3A33; --mint-on-dark:#4BE0BE;
+  --stamp:#FF7A5C; --stamp-soft:#3B1D18; --manila:#F4C04A; --manila-soft:#3A2F12;
+  --shadow:none; color-scheme:dark;}
 
-html,body{height:100%}
-body{background:var(--ground);color:var(--ink);font-family:var(--sans);margin:0;display:flex;flex-direction:column;overflow:hidden}
-a{color:inherit;text-decoration-color:var(--gold);text-underline-offset:2px}
-a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-
-/* ---------- sahne ---------- */
-.stage{flex:1;min-height:0;container-type:size;display:grid;place-items:center;
-  padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.slide{
-  width:min(100cqw,calc(100cqh * 16 / 9));aspect-ratio:16/9;max-width:100%;
-  container-type:inline-size;background:var(--paper);color:var(--ink);
-  box-shadow:0 1px 2px rgb(0 0 0 / .06),0 12px 40px rgb(10 18 40 / .12);
-  position:relative;overflow:hidden;display:none;
-  --fs-h1:7.2cqi;--fs-h2:3.5cqi;--fs-lead:1.9cqi;--fs-body:1.55cqi;--fs-sm:1.2cqi;--fs-xs:1.02cqi;--fs-num:5.6cqi;
-  --pad-x:5.2cqi;--pad-y:4cqi;--gap:2.2cqi;
-}
-.slide.active{display:flex;animation:in .35s ease-out}
-@keyframes in{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion: reduce){.slide.active{animation:none}}
-
-.inner{flex:1;display:flex;flex-direction:column;gap:var(--gap);padding:var(--pad-y) var(--pad-x) calc(var(--pad-y) + 1.4cqi);min-width:0}
-.eyebrow{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);display:flex;gap:1em;align-items:center}
-.eyebrow::after{content:"";flex:0 0 4cqi;height:1px;background:var(--gold);opacity:.6}
-h1,h2,h3{font-family:var(--serif);font-weight:600;margin:0;text-wrap:balance;letter-spacing:-.005em}
-h2{font-size:var(--fs-h2);line-height:1.08}
-h3{font-size:calc(var(--fs-body)*1.45);line-height:1.15}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--paper);color:var(--ink);font:17px/1.6 var(--sans);margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--petrol)}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--mint);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+section{padding-block:clamp(56px,9vw,112px)}
+h1,h2,h3{margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-weight:400;font-size:clamp(30px,4.2vw,48px);line-height:1.08;letter-spacing:-.01em}
+h3{font-size:20px;font-weight:700;line-height:1.25}
 p{margin:0}
-.lead{font-size:var(--fs-lead);line-height:1.4;color:var(--ink-2);max-width:62ch}
-.body{font-size:var(--fs-body);line-height:1.5}
-.sm{font-size:var(--fs-sm);line-height:1.45;color:var(--ink-2)}
-.xs{font-size:var(--fs-xs);line-height:1.4;color:var(--ink-2)}
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mint);font-weight:500}
+.lead{font-size:clamp(17px,1.7vw,20px);color:var(--ink-2);max-width:62ch}
+.muted{color:var(--ink-2)}
+.small{font-size:14.5px;line-height:1.55}
+.tiny{font-size:12.5px;color:var(--ink-2);line-height:1.5}
 .mono{font-family:var(--mono)}
-.num{font-family:var(--serif);font-weight:600;font-size:var(--fs-num);line-height:1;font-variant-numeric:lining-nums tabular-nums;color:var(--ink)}
-.gold{color:var(--gold)} .claret{color:var(--claret)}
-.cols{display:grid;gap:var(--gap);min-width:0}
-.cols > *{min-width:0}
-.c2{grid-template-columns:1fr 1fr}
-.c3{grid-template-columns:repeat(3,1fr)}
-.c4{grid-template-columns:repeat(4,1fr)}
-.c-5-7{grid-template-columns:5fr 7fr}
-.c-7-5{grid-template-columns:7fr 5fr}
-.grow{flex:1;min-height:0}
-.rule-top{border-top:1px solid var(--rule);padding-top:1.2cqi}
-.foot{position:absolute;left:var(--pad-x);right:var(--pad-x);bottom:1.6cqi;display:flex;justify-content:space-between;gap:2em;font-family:var(--mono);font-size:var(--fs-xs);color:var(--ink-2);letter-spacing:.04em}
-.foot .src{max-width:80%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-ul.plain{list-style:none;margin:0;padding:0;display:grid;gap:.9cqi}
-ul.plain li{font-size:var(--fs-body);line-height:1.45;padding-left:1.4em;position:relative}
-ul.plain li::before{content:"";position:absolute;left:.15em;top:.62em;width:.5em;height:1px;background:var(--gold)}
-.tag{display:inline-block;font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.06em;padding:.25em .6em;border:1px solid var(--rule);border-radius:2px;color:var(--ink-2);white-space:nowrap}
-.tag.warn{border-color:var(--claret);color:var(--claret)}
-.tag.gold{border-color:var(--gold);color:var(--gold)}
-.kunye{font-family:var(--mono);font-size:.92em;background:var(--gold-soft);padding:.05em .35em;border-radius:2px;white-space:nowrap}
+.head{display:grid;gap:14px;margin-bottom:clamp(28px,4vw,48px);max-width:820px}
+.grid{display:grid;gap:clamp(16px,2.4vw,28px)}
+.grid > *{min-width:0}
+.g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+@media (max-width:900px){.g3,.g4{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:620px){.g2,.g3,.g4{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:var(--shadow);display:grid;gap:10px;align-content:start}
+.kunye{font-family:var(--mono);font-size:.88em;background:var(--manila-soft);color:var(--ink);padding:.1em .45em;border-radius:4px;white-space:nowrap}
+.num{font-family:var(--display);font-size:clamp(38px,5vw,58px);line-height:1;font-variant-numeric:tabular-nums lining-nums}
+.src{font-family:var(--mono);font-size:11.5px;color:var(--ink-2);letter-spacing:.02em;margin-top:22px}
 
-/* SVG ortak */
-svg{display:block;width:100%;height:auto;max-width:100%}
+/* reveal: içerik her zaman görünür; görünüme girince yalnız hafif bir giriş oynar */
+.reveal.in{animation:up .7s cubic-bezier(.2,.7,.2,1) both}
+@keyframes up{from{opacity:.35;transform:translateY(18px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.reveal.in{animation:none}}
+
+/* ---------- nav ---------- */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--petrol) 92%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--on-petrol);border-bottom:1px solid rgb(255 255 255 / .06)}
+.nav .wrap{display:flex;align-items:center;gap:22px;padding-block:12px}
+.logo{font-family:var(--display);font-size:24px;letter-spacing:-.01em;text-decoration:none}
+.logo b{color:var(--mint-on-dark);font-weight:400}
+.nav ul{list-style:none;display:flex;gap:4px;margin:0 0 0 auto;padding:0}
+.nav ul a{display:block;padding:7px 11px;border-radius:8px;text-decoration:none;font-size:14.5px;color:var(--on-petrol-2);font-weight:500}
+.nav ul a:hover{color:var(--on-petrol);background:rgb(255 255 255 / .07)}
+.nav .cta{padding:8px 14px;border-radius:999px;background:var(--mint-on-dark);color:#062A2F;font-weight:700;font-size:14px;text-decoration:none;white-space:nowrap}
+@media (max-width:860px){.nav ul{display:none}.nav .cta{margin-left:auto}}
+
+/* ---------- hero ---------- */
+.hero{background:var(--petrol);color:var(--on-petrol);position:relative;overflow:hidden;padding-block:clamp(48px,7vw,96px) clamp(56px,8vw,104px)}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%;opacity:.55;pointer-events:none}
+.hero .wrap{position:relative;display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(28px,5vw,64px);align-items:center}
+@media (max-width:940px){.hero .wrap{grid-template-columns:1fr}}
+.hero .wrap.full{display:block}
+.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(40px,6.4vw,78px);line-height:1;letter-spacing:-.02em}
+.hero h1 span{display:block}
+.hero h1 .m{color:var(--mint-on-dark)}
+.hero h1 .s{color:var(--manila)}
+.hero .lead{color:var(--on-petrol-2);margin-top:22px}
+.hero .eyebrow{color:var(--mint-on-dark);margin-bottom:18px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 20px;border-radius:999px;font-weight:700;text-decoration:none;font-size:15.5px}
+.btn.p{background:var(--mint-on-dark);color:#062A2F}
+.btn.g{border:1px solid rgb(255 255 255 / .22);color:var(--on-petrol)}
+.btn:hover{transform:translateY(-1px)}
+
+/* doğrulama demosu */
+.verify{background:#0A2F36;border:1px solid rgb(75 224 190 / .18);border-radius:18px;padding:22px;box-shadow:0 30px 60px rgb(0 0 0 / .25);font-family:var(--mono);font-size:14px;color:#D8ECEA;display:grid;gap:14px;min-width:0}
+.verify .bar{display:flex;gap:7px;align-items:center;font-size:12px;color:#7FA7A6}
+.verify .bar i{width:10px;height:10px;border-radius:50%;background:#1E4A52;display:inline-block}
+.verify .q{color:#9CC3C2}
+.verify .q b{color:#EAF6F4;font-weight:500}
+.row{position:relative;border:1px dashed rgb(255 255 255 / .14);border-radius:12px;padding:14px 150px 14px 16px;display:grid;gap:6px;overflow:hidden;min-height:92px}
+.row .c{color:#EAF6F4;overflow-wrap:anywhere;min-height:1.6em}
+.row .c::after{content:"";display:inline-block;width:.55em;height:1.05em;background:var(--mint-on-dark);vertical-align:-.15em;margin-left:2px;animation:blink 1s steps(1) infinite;opacity:0}
+.row.typing .c::after{opacity:1}
+@keyframes blink{50%{background:transparent}}
+.row .meta{font-size:12px;color:#7FA7A6;opacity:1;transition:opacity .4s}
+.row.typing .meta{opacity:0}
+.stampmark{position:absolute;right:12px;top:50%;transform:translateY(-50%) rotate(-9deg);border:2.5px solid currentColor;border-radius:8px;padding:4px 10px;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;transition:transform .35s cubic-bezier(.3,1.6,.5,1),opacity .2s}
+.stampmark.ok{color:var(--mint-on-dark)}
+.stampmark.bad{color:#FF8A6E}
+.row.typing .stampmark{opacity:0;transform:translateY(-50%) rotate(-9deg) scale(1.8)}
+.row.bad .c{text-decoration:line-through;text-decoration-color:#FF8A6E;text-decoration-thickness:2px}
+.row.typing.bad .c{text-decoration:none}
+@media (max-width:520px){.row{padding-right:16px}.stampmark{position:static;transform:rotate(-4deg);justify-self:start}.row.typing .stampmark{transform:rotate(-4deg) scale(1.6)}}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgb(255 255 255 / .1);border-radius:16px;overflow:hidden;margin-top:clamp(36px,5vw,56px);position:relative}
+.stats div{background:var(--petrol);padding:20px 18px;display:grid;gap:4px}
+.stats .num{color:var(--on-petrol);font-size:clamp(28px,3.4vw,40px)}
+.stats .tiny{color:var(--on-petrol-2)}
+@media (max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+/* ---------- problem ---------- */
+.prob .card h3{display:flex;align-items:center;gap:10px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--mint);flex:none}
+.dot.r{background:var(--stamp)} .dot.y{background:var(--manila)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--mono);font-size:12.5px;padding:3px 9px;border-radius:999px;background:var(--mint-soft);color:var(--ink)}
+.chip.r{background:var(--stamp-soft)} .chip.y{background:var(--manila-soft)}
+.case{border-left:3px solid var(--stamp);padding:4px 0 4px 14px;display:grid;gap:6px}
+
+/* ---------- pazar ---------- */
+.split{display:flex;height:46px;border-radius:12px;overflow:hidden;font-weight:700;font-size:14px}
+.split div{display:flex;align-items:center;padding:0 14px;white-space:nowrap;overflow:hidden;min-width:0}
+.split .a{background:var(--mint);color:#04211C}
+.split .b{background:var(--manila);color:#2B1E00}
+.split .c{background:var(--line);color:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--ink-2)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+@media (max-width:700px){.split{height:22px;font-size:0}}
+@media (min-width:701px){.legend{display:none}}
+.cite .kunye{white-space:normal}
+
+/* ---------- rakipler ---------- */
+.camps{display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:clamp(16px,2.4vw,28px)}
+@media (max-width:900px){.camps{grid-template-columns:1fr}}
+.camp{display:grid;gap:12px;align-content:start}
+.camp .k{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.ent{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;padding:12px 14px;border-radius:10px;background:var(--surface);border:1px solid var(--line)}
+.ent b{font-weight:700}
+.ent span{color:var(--ink-2);font-size:14px;text-align:right}
+@media (max-width:420px){.ent{grid-template-columns:1fr}.ent span{text-align:left}}
+.ai-list{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.ai-list{grid-template-columns:1fr}}
+.gov{border:1px solid var(--stamp);background:var(--stamp-soft)}
+.chartbox{overflow-x:auto;margin-top:clamp(28px,4vw,44px)}
+.chartbox svg{min-width:640px;width:100%;height:auto;display:block}
 svg text{font-family:var(--sans);fill:var(--ink)}
-svg .t-muted{fill:var(--ink-2)}
-svg .t-gold{fill:var(--gold)}
-svg .t-claret{fill:var(--claret)}
-svg .t-mono{font-family:var(--mono)}
-svg .t-serif{font-family:var(--serif);font-weight:600}
-svg .grid{stroke:var(--rule);stroke-width:1}
-svg .box{fill:var(--paper);stroke:var(--ink-2);stroke-width:1.2}
-svg .box-gold{fill:var(--gold-soft);stroke:var(--gold);stroke-width:1.4}
-svg .box-claret{fill:var(--claret-soft);stroke:var(--claret);stroke-width:1.2}
-svg .box-ink{fill:var(--ink);stroke:none}
-svg .t-on-ink{fill:var(--paper)}
-svg .wire{stroke:var(--ink-2);stroke-width:1.4;fill:none}
-svg .wire-gold{stroke:var(--gold);stroke-width:1.6;fill:none}
-svg .wire-claret{stroke:var(--claret);stroke-width:1.4;fill:none;stroke-dasharray:5 4}
-svg .bar{fill:var(--ink-2);opacity:.55}
-svg .bar-gold{fill:var(--gold)}
-svg .bar-claret{fill:var(--claret)}
-svg .fill-gold{fill:var(--gold)}
-svg .fill-claret{fill:var(--claret)}
-svg .fill-ink2{fill:var(--ink-2)}
-svg .fill-rule{fill:var(--rule)}
-svg .fill-goldsoft{fill:var(--gold-soft)}
-svg .fill-claretsoft{fill:var(--claret-soft)}
+svg .mu{fill:var(--ink-2)} svg .mo{font-family:var(--mono)}
+svg .gl{stroke:var(--line);stroke-width:1}
+svg .pb{fill:var(--mint)} svg .pl{fill:var(--stamp)} svg .py{fill:var(--manila)}
+.grow-x{transform-box:fill-box;transform-origin:left center}
+.in .grow-x{animation:gx .9s cubic-bezier(.2,.7,.2,1) both}
+@keyframes gx{from{transform:scaleX(.08)}to{transform:none}}
+@media (prefers-reduced-motion:reduce){.in .grow-x{animation:none}}
 
-/* ---------- kapak ---------- */
-.cover{background:var(--navy);color:var(--on-navy)}
-.cover .inner{justify-content:center;gap:2.4cqi;padding-left:8cqi}
-.cover .eyebrow{color:var(--gold-on-navy)}
-.cover .eyebrow::after{background:var(--gold-on-navy)}
-.cover h1{font-size:var(--fs-h1);line-height:.95;font-weight:600;color:var(--on-navy)}
-.cover h1 em{font-style:italic;font-weight:500;color:var(--gold-on-navy)}
-.cover .thesis{font-family:var(--serif);font-size:calc(var(--fs-lead)*1.45);line-height:1.25;max-width:30ch;color:var(--on-navy)}
-.cover .sub{font-size:var(--fs-body);color:var(--on-navy-2)}
-.cover .foot{color:var(--on-navy-2)}
-.cover .seal{position:absolute;right:6cqi;top:50%;transform:translateY(-50%);width:26cqi;opacity:.9}
-.cover .seal circle,.cover .seal path,.cover .seal line{stroke:var(--gold-on-navy);fill:none}
-.cover .seal text{fill:var(--gold-on-navy);font-family:var(--mono);letter-spacing:.3em}
+/* ---------- fırsat ---------- */
+.gap{display:grid;gap:10px;padding:24px;border-radius:14px;background:var(--surface);border:1px solid var(--line);position:relative;overflow:hidden}
+.gap .q{font-family:var(--display);font-size:22px;line-height:1.2;color:var(--mint)}
+.gap:nth-child(2) .q{color:var(--stamp)} .gap:nth-child(3) .q{color:var(--manila)}
 
-/* ---------- özel bileşenler ---------- */
-.case{border-left:2px solid var(--claret);padding:1cqi 0 1cqi 1.8cqi;display:grid;gap:.8cqi}
-.stat{display:grid;gap:.6cqi;align-content:start}
-.stat .lbl{font-size:var(--fs-sm);color:var(--ink-2);line-height:1.4}
-.split-legend{display:flex;flex-wrap:wrap;gap:1.2cqi 2.4cqi;font-size:var(--fs-sm);color:var(--ink-2)}
-.sw{display:inline-block;width:.9em;height:.9em;vertical-align:-.1em;margin-right:.4em;border-radius:1px}
+/* ---------- çözüm ---------- */
+.dark{background:var(--petrol);color:var(--on-petrol)}
+.dark .lead,.dark .muted{color:var(--on-petrol-2)}
+.dark .eyebrow{color:var(--mint-on-dark)}
+.pillar{display:grid;gap:10px;padding:22px;border-radius:14px;background:var(--petrol-2);border:1px solid rgb(255 255 255 / .08);align-content:start}
+.pillar .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:rgb(75 224 190 / .12)}
+.pillar .ic svg{width:24px;height:24px;stroke:var(--mint-on-dark);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.pillar p{color:var(--on-petrol-2);font-size:15px}
+.arch{overflow-x:auto;margin-top:clamp(32px,4vw,52px);border-radius:16px;background:var(--petrol-2);border:1px solid rgb(255 255 255 / .08);padding:18px}
+.arch svg{min-width:760px;width:100%;height:auto;display:block}
+.arch text{fill:var(--on-petrol);font-family:var(--sans)}
+.arch .t2{fill:var(--on-petrol-2)}
+.arch .bx{fill:#0A2F36;stroke:rgb(255 255 255 / .16);stroke-width:1.2}
+.arch .bx-m{fill:rgb(75 224 190 / .1);stroke:var(--mint-on-dark);stroke-width:1.4}
+.arch .bx-r{fill:rgb(255 138 110 / .1);stroke:#FF8A6E;stroke-width:1.3}
+.arch .flow{stroke:var(--mint-on-dark);stroke-width:1.6;fill:none;stroke-dasharray:6 7;animation:flow 1.4s linear infinite}
+.arch .flow.r{stroke:#FF8A6E}
+@keyframes flow{to{stroke-dashoffset:-26}}
+@media (prefers-reduced-motion:reduce){.arch .flow{animation:none}}
+.arch .ah{fill:var(--mint-on-dark)} .arch .ahr{fill:#FF8A6E}
 
-.map{display:grid;grid-template-columns:1.05fr 1.7fr 1fr 1fr;gap:1.6cqi;min-height:0}
-.map > section{display:grid;align-content:start;gap:.9cqi;min-width:0;border-top:2px solid var(--ink);padding-top:1cqi}
-.map > section.ai{border-top-color:var(--gold)}
-.map > section.gov{border-top-color:var(--claret)}
-.map h3{font-size:calc(var(--fs-body)*1.25)}
-.map .k{font-family:var(--mono);font-size:var(--fs-xs);color:var(--ink-2);letter-spacing:.08em;text-transform:uppercase}
-.map dl{margin:0;display:grid;gap:1.3cqi}
-.map .ai dl{grid-template-columns:1fr 1fr;column-gap:1.6cqi}
-.map dt{font-weight:600;font-size:var(--fs-body);line-height:1.2}
-.map dd{margin:0;font-size:var(--fs-sm);color:var(--ink-2);line-height:1.35;font-variant-numeric:tabular-nums}
-.map .ent{display:grid;gap:.15cqi}
+/* ---------- veri ---------- */
+.bars{display:grid;gap:12px}
+.bars .r{display:grid;grid-template-columns:110px 1fr 84px;gap:12px;align-items:center;font-size:14.5px}
+.bars .t{height:14px;border-radius:7px;background:var(--line);overflow:hidden}
+.bars .t i{display:block;height:100%;border-radius:7px;background:var(--mint)}
+.bars .t i.r{background:var(--stamp)} .bars .t i.y{background:var(--manila)} .bars .t i.g{background:var(--ink-2)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:13px}
+@media (max-width:420px){.bars .r{grid-template-columns:90px 1fr 70px}}
+.cite{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:10px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.cite:last-child{border-bottom:0}
+.cite .n{font-family:var(--mono);font-weight:700;color:var(--mint);font-variant-numeric:tabular-nums}
+.alert{border:1px solid var(--stamp);background:var(--stamp-soft);border-radius:12px;padding:16px 18px;display:grid;gap:6px}
+.alert b{color:var(--stamp)}
+code{font-family:var(--mono);font-size:.86em;background:var(--mint-soft);padding:.1em .4em;border-radius:4px;overflow-wrap:anywhere}
 
-.gap-item{display:grid;gap:.8cqi;align-content:start;border-top:1px solid var(--rule);padding-top:1.2cqi}
-.gap-item .q{font-family:var(--serif);font-style:italic;font-size:calc(var(--fs-body)*1.3);line-height:1.2;color:var(--gold)}
+/* ---------- hukuk ---------- */
+.law .art{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;color:var(--mint);text-transform:uppercase;font-weight:700}
+.pyr{display:grid;gap:6px;justify-items:center}
+.pyr div{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;font-weight:700;width:100%}
+.pyr .l1{max-width:48%;background:var(--stamp);color:#fff}
+.pyr .l2{max-width:74%;background:var(--manila);color:#2B1E00}
+.pyr .l3{background:var(--line);color:var(--ink)}
+.pyr span{font-family:var(--mono);font-size:12px;font-weight:500;opacity:.85}
+@media (max-width:520px){.pyr .l1,.pyr .l2{max-width:100%}}
 
-.pillar{display:grid;gap:.9cqi;align-content:start;border-top:2px solid var(--ink);padding-top:1.2cqi}
-.pillar .ltr{font-family:var(--serif);font-size:calc(var(--fs-num)*.8);line-height:.9;color:var(--gold);font-weight:600}
+/* ---------- model ---------- */
+.tier{display:grid;gap:10px;padding:26px;border-radius:16px;border:1px solid var(--line);background:var(--surface);align-content:start}
+.tier.hot{border:2px solid var(--mint);box-shadow:0 18px 40px rgb(20 168 137 / .15)}
+.tier .price{font-family:var(--display);font-size:42px;line-height:1}
+.tier ul{margin:4px 0 0;padding:0;list-style:none;display:grid;gap:7px;font-size:15px}
+.tier li{padding-left:22px;position:relative}
+.tier li::before{content:"";position:absolute;left:2px;top:.55em;width:10px;height:6px;border-left:2px solid var(--mint);border-bottom:2px solid var(--mint);transform:rotate(-45deg)}
+.badge{justify-self:start;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:var(--mint-soft);color:var(--ink)}
 
-.facts{display:grid;gap:1.1cqi}
-.fact{font-size:var(--fs-sm);line-height:1.5}
-.fact b{display:block;font-weight:600;color:var(--ink);margin-bottom:.2cqi}
-.fact code{font-family:var(--mono);font-size:.9em;color:var(--ink);background:var(--gold-soft);padding:0 .3em;border-radius:2px;overflow-wrap:anywhere}
-.alert{border:1px solid var(--claret);background:var(--claret-soft);padding:1cqi 1.4cqi;font-size:var(--fs-sm);line-height:1.4;border-radius:2px}
-.alert b{color:var(--claret)}
+/* ---------- yol haritası ---------- */
+.road{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+@media (max-width:860px){.road{grid-template-columns:1fr;gap:22px}}
+.phase{padding:26px 22px 0 0;border-top:3px solid var(--line);display:grid;gap:8px;align-content:start;position:relative}
+.phase::before{content:"";position:absolute;top:-10px;left:0;width:17px;height:17px;border-radius:50%;background:var(--paper);border:3px solid var(--line)}
+.phase.done{border-top-color:var(--mint)}
+.phase.done::before{background:var(--mint);border-color:var(--mint)}
+.phase .w{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.phase.done .w{color:var(--mint)}
+.phase ul{margin:0;padding-left:18px;color:var(--ink-2);font-size:15px;display:grid;gap:4px}
+@media (max-width:860px){.phase{padding:18px 0 0 0}}
 
-.law{display:grid;gap:.5cqi;align-content:start}
-.law .art{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.08em;color:var(--gold);text-transform:uppercase}
+/* ---------- risk ---------- */
+.risk{width:100%;border-collapse:collapse;font-size:15.5px}
+.risk th{text-align:left;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);font-weight:500;padding:0 18px 10px 0;border-bottom:2px solid var(--ink)}
+.risk td{padding:16px 18px 16px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.risk td:first-child{font-weight:700;white-space:nowrap}
+.risk td:nth-child(2){color:var(--ink-2)}
+.tablebox{overflow-x:auto}
+.tablebox table{min-width:640px}
 
-.mock{border:1px solid var(--rule);background:var(--ground);padding:1.2cqi;display:grid;gap:.8cqi;align-content:start;border-radius:3px;min-width:0}
-.mock .mt{display:flex;justify-content:space-between;gap:1em;align-items:baseline}
-.mock h3{font-size:calc(var(--fs-body)*1.15)}
-.mock .row{display:flex;justify-content:space-between;gap:1em;font-size:var(--fs-xs);border-bottom:1px solid var(--rule);padding-block:.45cqi;color:var(--ink-2)}
-.mock .row b{font-weight:500;color:var(--ink)}
-.banner{display:grid;gap:.3cqi;border-left:3px solid var(--claret);background:var(--paper);padding:.8cqi 1cqi;font-size:var(--fs-xs);line-height:1.4}
-.banner b{color:var(--claret);font-weight:600}
-
-.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;counter-reset:s}
-.step{border-top:2px solid var(--rule);padding:1.4cqi 1.6cqi 0 0;display:grid;gap:.7cqi;align-content:start;position:relative}
-.step::before{content:"";position:absolute;top:-.7cqi;left:0;width:1.2cqi;height:1.2cqi;border-radius:50%;background:var(--paper);border:2px solid var(--gold)}
-.step.now{border-top-color:var(--gold)}
-.step.now::before{background:var(--gold)}
-.step .when{font-family:var(--mono);font-size:var(--fs-xs);color:var(--gold);letter-spacing:.08em;text-transform:uppercase}
-.step h3{font-size:calc(var(--fs-body)*1.3)}
-
-.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:1.8cqi}
-.tier{border:1px solid var(--rule);padding:1.6cqi;display:grid;gap:.8cqi;align-content:start;justify-items:start;border-radius:2px;background:var(--paper)}
-.tier.mid{border-color:var(--gold);box-shadow:inset 0 3px 0 var(--gold)}
-.tier .price{font-family:var(--serif);font-weight:600;font-size:calc(var(--fs-num)*.72);line-height:1;font-variant-numeric:lining-nums tabular-nums}
-.tier .per{font-size:var(--fs-xs);color:var(--ink-2)}
-
-table.risk{width:100%;border-collapse:collapse;font-size:var(--fs-body);line-height:1.4}
-table.risk th{text-align:left;font-family:var(--mono);font-size:var(--fs-xs);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);padding:.6cqi 1.4cqi .6cqi 0;border-bottom:1px solid var(--ink)}
-table.risk td{padding:1cqi 1.4cqi 1cqi 0;border-bottom:1px solid var(--rule);vertical-align:top}
-table.risk td:first-child{font-weight:600;width:24%}
-table.risk td:nth-child(2){color:var(--ink-2);width:30%}
-
-.closing{background:var(--navy);color:var(--on-navy)}
-.closing .inner{justify-content:center;align-items:flex-start;gap:3cqi;padding-left:8cqi}
-.closing h2{font-size:calc(var(--fs-h1)*.9);line-height:1;color:var(--on-navy)}
-.closing h2 em{color:var(--gold-on-navy);font-style:italic;font-weight:500}
-.closing .eyebrow{color:var(--gold-on-navy)} .closing .eyebrow::after{background:var(--gold-on-navy)}
-.closing .who{font-size:var(--fs-lead);color:var(--on-navy)}
-.closing .mail{font-family:var(--mono);font-size:var(--fs-body);color:var(--gold-on-navy);user-select:all}
-.closing .foot{color:var(--on-navy-2)}
-.closing .kunye-line{font-family:var(--mono);font-size:var(--fs-sm);color:var(--on-navy-2);border-top:1px solid var(--on-navy-2);padding-top:1cqi;letter-spacing:.04em}
-
-/* ---------- gezinme ---------- */
-.nav{flex:0 0 auto;display:flex;align-items:center;gap:14px;padding-block:10px;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
-  padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));
-  font-family:var(--mono);font-size:12px;color:var(--ink-2);background:var(--ground)}
-.nav button{font:inherit;color:var(--ink);background:transparent;border:1px solid var(--rule);border-radius:2px;width:34px;height:28px;cursor:pointer;display:grid;place-items:center}
-.nav button:hover{border-color:var(--gold);color:var(--gold)}
-.nav button:disabled{opacity:.35;cursor:default}
-.track{flex:1;height:3px;background:var(--rule);position:relative;cursor:pointer;border-radius:2px}
-.track span{position:absolute;inset:0 auto 0 0;background:var(--gold);width:0;transition:width .25s ease}
-.counter{font-variant-numeric:tabular-nums;min-width:4.5em;text-align:right}
-.hint{white-space:nowrap}
-@media (prefers-reduced-motion: reduce){.track span{transition:none}}
-
-/* ---------- dar ekran: dikey akış ---------- */
-body.flow{overflow:auto;display:block;height:auto}
-body.flow .stage{container-type:normal;display:flex;flex-direction:column;gap:16px;padding-block:16px}
-body.flow .slide{display:flex;width:100%;aspect-ratio:auto;animation:none;
-  --fs-h1:2.6rem;--fs-h2:1.7rem;--fs-lead:1.05rem;--fs-body:.95rem;--fs-sm:.85rem;--fs-xs:.75rem;--fs-num:2.4rem;
-  --pad-x:18px;--pad-y:22px;--gap:16px}
-body.flow .inner{padding-bottom:48px}
-body.flow .cols,body.flow .map,body.flow .tiers,body.flow .steps{grid-template-columns:1fr}
-body.flow .map .ai dl{grid-template-columns:1fr 1fr}
-body.flow .steps{gap:18px}
-body.flow .cover .seal{position:static;transform:none;width:120px;margin-top:8px}
-body.flow .cover .inner,body.flow .closing .inner{padding-left:18px}
-body.flow .foot{bottom:14px;flex-direction:column;gap:2px}
-body.flow .foot .src{white-space:normal;max-width:none}
-body.flow .nav{display:none}
-body.flow .step{padding-right:0}
-body.flow .wide-svg{overflow-x:auto}
-body.flow .wide-svg svg{min-width:560px}
+/* ---------- kapanış ---------- */
+.closing{background:var(--petrol);color:var(--on-petrol);text-align:left}
+.closing h2{font-size:clamp(36px,6vw,72px)}
+.closing h2 em{font-style:normal;color:var(--mint-on-dark)}
+.closing .k{font-family:var(--mono);color:var(--on-petrol-2);border-top:1px solid rgb(255 255 255 / .15);padding-top:16px;margin-top:28px;font-size:14px;overflow-wrap:anywhere}
+.contact{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:22px}
+.contact .mail{font-family:var(--mono);font-size:17px;color:var(--mint-on-dark);user-select:all}
+.copy{font:inherit;font-size:13px;font-weight:700;padding:7px 14px;border-radius:999px;border:1px solid rgb(255 255 255 / .25);background:transparent;color:var(--on-petrol);cursor:pointer}
+footer{background:var(--petrol);color:var(--on-petrol-2);font-size:13px;border-top:1px solid rgb(255 255 255 / .08)}
+footer .wrap{padding-block:22px;display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between}
 </style>
 
-<main class="stage" id="stage" aria-live="polite">
-
-<!-- 1 KAPAK -->
-<section class="slide cover" id="s1" aria-label="Kapak">
-  <div class="inner">
-    <div class="eyebrow">Ürün sunumu · Ekim 2026</div>
-    <h1>Yargit<em>AI</em></h1>
-    <p class="thesis">Emsal kararı bul, atfını doğrula, içtihadın yönünü gör.</p>
-    <p class="sub">Avukatlar için içtihat zekâsı platformu</p>
+<nav class="nav" aria-label="Bölümler">
+  <div class="wrap">
+    <a class="logo" href="#top">Yargit<b>AI</b></a>
+    <ul>
+      <li><a href="#problem">Problem</a></li>
+      <li><a href="#rekabet">Rekabet</a></li>
+      <li><a href="#cozum">Çözüm</a></li>
+      <li><a href="#veri">Veri</a></li>
+      <li><a href="#model">İş modeli</a></li>
+      <li><a href="#yol">Yol haritası</a></li>
+    </ul>
+    <a class="cta" href="#veri">İlk gecenin sonuçları</a>
   </div>
-  <svg class="seal" viewBox="0 0 200 200" aria-hidden="true">
-    <circle cx="100" cy="100" r="92" stroke-width="1"/>
-    <circle cx="100" cy="100" r="74" stroke-width="1.5"/>
-    <path id="arc" d="M100,100 m-83,0 a83,83 0 1,1 166,0 a83,83 0 1,1 -166,0" stroke="none"/>
-    <text font-size="9.5"><textPath href="#arc">E. ____/____ · K. ____/____ · KÜNYE DOĞRULANDI · </textPath></text>
-    <line x1="100" y1="58" x2="100" y2="142" stroke-width="1.5"/>
-    <line x1="64" y1="74" x2="136" y2="74" stroke-width="1.5"/>
-    <path d="M64,74 L50,108 L78,108 Z M136,74 L122,108 L150,108 Z" stroke-width="1.2"/>
-    <path d="M50,108 Q64,120 78,108 M122,108 Q136,120 150,108" stroke-width="1.2"/>
-    <line x1="82" y1="142" x2="118" y2="142" stroke-width="1.5"/>
-  </svg>
-  <div class="foot"><span>YargitAI</span><span>19 Ekim 2026</span></div>
-</section>
+</nav>
 
-<!-- 2 PROBLEM -->
-<section class="slide" id="s2" aria-label="Problem">
-  <div class="inner">
-    <div class="eyebrow">Problem</div>
-    <h2>Emsal aramak saatler alıyor ve yapay zekâ künye uyduruyor</h2>
-    <div class="cols c3 grow">
-      <div class="stat rule-top">
-        <h3>Zaman</h3>
-        <p class="body">Avukat doğru emsali bulmak için onlarca kararı tek tek açıp okuyor. Arama sonucu sıralı bir liste, cevap değil.</p>
+<header class="hero" id="top">
+  <canvas id="net" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Avukatlar için içtihat zekâsı · Ekim 2026</p>
+      <h1><span>Emsali bul.</span><span class="m">Künyesini doğrula.</span><span class="s">İçtihadın yönünü gör.</span></h1>
+      <p class="lead">YargitAI, Yargıtay kararlarını Türkçeyi anlayan bir aramayla tarar, kararlar arasındaki atıf ağını çıkarır ve cevaptaki her künyeyi veritabanında kontrol eder. Uydurma karar numarası avukatın önüne gelmez.</p>
+      <div class="hero-actions">
+        <a class="btn p" href="#cozum">Nasıl çalışıyor</a>
+        <a class="btn g" href="#rekabet">Pazar ve rakipler</a>
       </div>
-      <div class="stat rule-top">
-        <h3>Türkçe çekim</h3>
-        <p class="body">Anahtar kelime araması ekleri tanımıyor:</p>
-        <p class="sm mono">fesih · feshi · feshedilen · feshedildiği</p>
-        <p class="body">Aynı kavram dört ayrı sorgu demek. Eş anlamlı hukuk terimleri de kaçıyor.</p>
+    </div>
+
+    <div class="verify" aria-label="Künye doğrulama örneği">
+      <div class="bar"><i></i><i></i><i></i><span style="margin-left:8px">atıf doğrulayıcı · canlı veritabanı</span></div>
+      <p class="q">soru › <b>Fazla çalışma tanıkla ispatlanırsa hakkaniyet indirimi yapılır mı?</b></p>
+      <div class="row" id="r1">
+        <span class="c" data-text="Yargıtay 9. HD, 2023/3001 E., 2023/6593 K., 03.05.2023">Yargıtay 9. HD, 2023/3001 E., 2023/6593 K., 03.05.2023</span>
+        <span class="meta">veritabanında · 5.659 karar bu karara atıf yapıyor</span>
+        <span class="stampmark ok">Doğrulandı</span>
       </div>
-      <div class="stat rule-top">
-        <h3 class="claret">Uydurma künye</h3>
+      <div class="row bad" id="r2">
+        <span class="c" data-text="Yargıtay 9. HD, 2022/48817 E., 2023/1190 K., 14.02.2023">Yargıtay 9. HD, 2022/48817 E., 2023/1190 K., 14.02.2023</span>
+        <span class="meta">bu esas/karar çifti hiçbir kayıtta yok · cevapta işaretlendi</span>
+        <span class="stampmark bad">Doğrulanamadı</span>
+      </div>
+      <p class="tiny" style="color:#7FA7A6">İkinci künye örnek olarak uydurulmuştur: sistemin nasıl yakaladığını gösterir.</p>
+    </div>
+  </div>
+  <div class="wrap full">
+    <div class="stats reveal">
+      <div><span class="num" data-count="1060678">1.060.678</span><span class="tiny">Yargıtay kararı ilk gece indekslendi</span></div>
+      <div><span class="num" data-count="122237">122.237</span><span class="tiny">karardan karara atıf çıkarıldı</span></div>
+      <div><span class="num" data-count="4300066">4.300.066</span><span class="tiny">kanun maddesi atfı</span></div>
+      <div><span class="num" data-count="121060">121.060</span><span class="tiny">iş hukuku kararı anlamsal vektörde</span></div>
+    </div>
+  </div>
+</header>
+
+<section id="problem" class="prob">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">Problem</p>
+      <h2>Emsal aramak saatler alıyor, yapay zekâ ise künye uyduruyor</h2>
+    </div>
+    <div class="grid g3">
+      <article class="card reveal">
+        <h3><span class="dot y"></span>Zaman</h3>
+        <p class="muted">Avukat doğru emsali bulmak için onlarca kararı tek tek açıp okuyor. Arama sonucu sıralı bir liste veriyor, cevap vermiyor.</p>
+      </article>
+      <article class="card reveal">
+        <h3><span class="dot"></span>Türkçe çekim</h3>
+        <p class="muted">Anahtar kelime araması ekleri tanımıyor. Aynı kavram dört ayrı sorgu demek:</p>
+        <div class="chips"><span class="chip">fesih</span><span class="chip">feshi</span><span class="chip">feshedilen</span><span class="chip">feshedildiği</span></div>
+      </article>
+      <article class="card reveal">
+        <h3><span class="dot r"></span>Uydurma künye</h3>
         <div class="case">
-          <p class="sm"><b>Haziran 2026, Ankara/Kızılcahamam.</b> 25 yıllık bir avukatın dilekçesine AI ile eklenen Yargıtay kararları UYAP'ta o künyeyle bulunamadı. Baro ve Başsavcılığa bildirildi, soruşturma açıldı.</p>
-          <p class="sm">Hata içerikte değil, esas ve karar numaralarındaydı.</p>
+          <p class="small"><b>Haziran 2026, Ankara/Kızılcahamam.</b> Bir avukatın dilekçesine yapay zekâyla eklenen Yargıtay kararları UYAP'ta o künyeyle bulunamadı. Soruşturma açıldı.</p>
         </div>
-        <p class="sm">Stanford RegLab: Lexis+ AI sorguların <b class="claret">%17'sinden</b>, Westlaw AI <b class="claret">%34'ünden</b> fazlasında hatalı bilgi üretti.</p>
-      </div>
+        <p class="small muted">Stanford RegLab: Lexis+ AI sorguların <b style="color:var(--stamp)">%17'sinden</b>, Westlaw AI <b style="color:var(--stamp)">%34'ünden</b> fazlasında hatalı bilgi üretti.</p>
+      </article>
     </div>
+    <p class="src">Kaynak: memurlar.net, Hukuki Haber, Sözcü (Haziran 2026) · Stanford HAI, "AI on Trial"</p>
   </div>
-  <div class="foot"><span class="src">Kaynak: memurlar.net, Hukuki Haber, Sözcü (Haziran 2026) · Stanford HAI, "AI on Trial"</span><span>02</span></div>
 </section>
 
-<!-- 3 PAZAR -->
-<section class="slide" id="s3" aria-label="Pazar">
-  <div class="inner">
-    <div class="eyebrow">Pazar</div>
-    <h2>Büyüyen ve iki şehirde yoğunlaşan bir meslek</h2>
-    <div class="cols c3">
-      <div class="stat">
-        <span class="num">206.678</span>
-        <span class="lbl">avukat, 31.12.2025 itibarıyla</span>
-      </div>
-      <div class="stat">
-        <span class="num gold">%44</span>
-        <span class="lbl">5 yıllık artış (2020 sonunda 143.330). 2025'teki artış %3,8 ile 2002'den beri en düşük.</span>
-      </div>
-      <div class="stat">
-        <span class="num">504</span>
-        <span class="lbl">Türkiye'deki AI girişimi (TRAI, Ekim 2026). Yeni eklenenlerde hukuk teknolojisi öne çıkıyor.</span>
-      </div>
+<section id="pazar" style="padding-top:0">
+  <div class="wrap">
+    <div class="grid g3 reveal">
+      <div class="card"><span class="num">206.678</span><span class="muted small">avukat, 31.12.2025 itibarıyla</span></div>
+      <div class="card"><span class="num" style="color:var(--mint)">%44</span><span class="muted small">5 yıllık artış (2020 sonunda 143.330)</span></div>
+      <div class="card"><span class="num" style="color:var(--manila)">504</span><span class="muted small">Türkiye'deki yapay zekâ girişimi (TRAI, Ekim 2026); hukuk teknolojisi öne çıkıyor</span></div>
     </div>
-    <div class="rule-top" style="display:grid;gap:1.2cqi">
-      <p class="sm">Avukatların yaklaşık yarısı İstanbul ve Ankara barolarında</p>
-      <svg viewBox="0 0 900 40" role="img" aria-label="İstanbul yüzde 34,6, Ankara yüzde 14,2, diğer iller yüzde 51,3">
-        <rect x="0" y="6" width="311.1" height="28" class="fill-gold"/>
-        <rect x="312.1" y="6" width="126.5" height="28" class="fill-claret"/>
-        <rect x="439.6" y="6" width="460.4" height="28" class="fill-rule"/>
-        <text x="12" y="25" font-size="14" class="t-on-ink" font-weight="600">İstanbul 71.442</text>
-        <text x="322" y="25" font-size="14" class="t-on-ink" font-weight="600">Ankara 29.284</text>
-        <text x="450" y="25" font-size="14" class="t-muted">Diğer barolar 105.952</text>
-      </svg>
-      <p class="xs">Kaba üst sınır (varsayım, doğrulanmış veri değil): 206 bin avukatın %10'u ayda 1.500 TL öderse yıllık yaklaşık 370 milyon TL. Ek talep: hakim ve savcılar, hukuk öğrencileri, şirket hukuk birimleri.</p>
+    <div class="reveal" style="margin-top:22px;display:grid;gap:10px">
+      <p class="small muted">Avukatların yaklaşık yarısı iki baroda</p>
+      <div class="split" role="img" aria-label="İstanbul yüzde 34,6, Ankara yüzde 14,2, diğer barolar yüzde 51,3">
+        <div class="a" style="flex:71442">İstanbul 71.442</div>
+        <div class="b" style="flex:29284">Ankara 29.284</div>
+        <div class="c" style="flex:105952">Diğer barolar 105.952</div>
+      </div>
+      <div class="legend"><span><i style="background:var(--mint)"></i>İstanbul 71.442</span><span><i style="background:var(--manila)"></i>Ankara 29.284</span><span><i style="background:var(--line)"></i>Diğer 105.952</span></div>
     </div>
+    <p class="src">Kaynak: TBB verisine dayanan haberler (Bengütürk, Haber7), imer.av.tr, CNBC-e</p>
   </div>
-  <div class="foot"><span class="src">Kaynak: TBB verisine dayanan haberler (Bengütürk, Haber7), imer.av.tr, CNBC-e</span><span>03</span></div>
 </section>
 
-<!-- 4 RAKIP HARITASI -->
-<section class="slide" id="s4" aria-label="Rakip haritası">
-  <div class="inner">
-    <div class="eyebrow">Rekabet</div>
-    <h2>Dört kamp: veritabanı, AI girişimi, devlet, açık kaynak</h2>
-    <div class="map grow">
-      <section>
+<section id="rekabet" style="background:var(--surface);border-block:1px solid var(--line)">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">Rekabet</p>
+      <h2>Dört kamp: köklü veritabanları, yapay zekâ girişimleri, devlet ve açık kaynak</h2>
+      <p class="lead">Herkes milyonlarca karar ve "halüsinasyonsuz" cevap vaat ediyor. Bağımsız ölçüm yayınlayan ya da bir kararın hâlâ geçerli olup olmadığını takip eden yok.</p>
+    </div>
+    <div class="camps">
+      <div class="camp reveal">
         <span class="k">Köklü veritabanları</span>
-        <dl>
-          <div class="ent"><dt>Lexpera</dt><dd>LEXI AI · yıllık 34.200–48.000 TL</dd></div>
-          <div class="ent"><dt>Kazancı</dt><dd>KAZANCI AI · fiyat yayınlanmıyor</dd></div>
-          <div class="ent"><dt>Legalbank</dt><dd>AI görünmüyor · fiyat yayınlanmıyor</dd></div>
-          <div class="ent"><dt>Ara Karar</dt><dd>11,2M karar · anlamsal arama · ücretsiz katman</dd></div>
-        </dl>
-      </section>
-      <section class="ai">
+        <div class="ent"><b>Lexpera</b><span>LEXI AI · yıllık 34.200–48.000 TL</span></div>
+        <div class="ent"><b>Kazancı</b><span>KAZANCI AI · fiyat yok</span></div>
+        <div class="ent"><b>Legalbank</b><span>AI görünmüyor</span></div>
+        <div class="ent"><b>Ara Karar</b><span>11,2M karar · ücretsiz katman</span></div>
+      </div>
+      <div class="camp reveal">
         <span class="k">Yeni nesil AI girişimleri · aylık</span>
-        <dl>
-          <div class="ent"><dt>C'esta Lex</dt><dd>2.499–3.999 TL · 12M+ karar</dd></div>
-          <div class="ent"><dt>Judis AI</dt><dd>1.360–3.060 TL + KDV</dd></div>
-          <div class="ent"><dt>Lykos AI</dt><dd>3.000–6.000 TL + KDV</dd></div>
-          <div class="ent"><dt>Avudex</dt><dd>1.600–7.200 TL</dd></div>
-          <div class="ent"><dt>Lawlera AI</dt><dd>999 TL + KDV</dd></div>
-          <div class="ent"><dt>KatipAI</dt><dd>499 TL (ilk ay 199)</dd></div>
-          <div class="ent"><dt>Avarsis</dt><dd>Kredi: 500–40.000 TL paket</dd></div>
-          <div class="ent"><dt>Argüman AI</dt><dd>Ücretsiz temel · ~15M karar</dd></div>
-          <div class="ent"><dt>Leagle</dt><dd>Basic/Pro/Enterprise · fiyat yok</dd></div>
-        </dl>
-      </section>
-      <section class="gov">
-        <span class="k">Devlet</span>
-        <dl>
-          <div class="ent"><dt>UYAP AI Karar Destek</dt><dd>12 Mayıs 2026'da duyuruldu. 30M+ emsal karar. Hedef hakim ve savcı. Avukat erişimi belirsiz.</dd></div>
-        </dl>
-      </section>
-      <section>
-        <span class="k">Açık kaynak</span>
-        <dl>
-          <div class="ent"><dt>yargi-mcp</dt><dd>MIT lisansı · Yargıtay, Danıştay, AYM, UYAP Emsal ve kurumlar. Ücretli Pro sürümü var.</dd></div>
-          <div class="ent"><dt>HukukBERT</dt><dd>~11M belge, 27 GB metinle eğitilmiş dil modeli</dd></div>
-        </dl>
-      </section>
+        <div class="ai-list">
+          <div class="ent"><b>C'esta Lex</b><span>2.499–3.999 TL</span></div>
+          <div class="ent"><b>Judis AI</b><span>1.360–3.060 + KDV</span></div>
+          <div class="ent"><b>Lykos AI</b><span>3.000–6.000 + KDV</span></div>
+          <div class="ent"><b>Avudex</b><span>1.600–7.200 TL</span></div>
+          <div class="ent"><b>Lawlera AI</b><span>999 + KDV</span></div>
+          <div class="ent"><b>KatipAI</b><span>499 TL</span></div>
+          <div class="ent"><b>Avarsis</b><span>kredi paketi</span></div>
+          <div class="ent"><b>Argüman AI</b><span>ücretsiz temel</span></div>
+        </div>
+      </div>
+      <div class="camp reveal">
+        <span class="k">Devlet ve açık kaynak</span>
+        <div class="ent gov" style="grid-template-columns:1fr"><b>UYAP AI Karar Destek</b><span style="text-align:left">12 Mayıs 2026'da duyuruldu. 30M+ karar. Hedef hakim ve savcı; avukat erişimi belirsiz.</span></div>
+        <div class="ent" style="grid-template-columns:1fr"><b>yargi-mcp</b><span style="text-align:left">MIT lisanslı; Yargıtay, Danıştay, AYM, UYAP Emsal. Ücretli Pro sürümü var.</span></div>
+      </div>
     </div>
-  </div>
-  <div class="foot"><span class="src">Kaynak: satıcı siteleri (19.10.2026 liste fiyatları), GZT, glama.ai, arXiv 2604.04790 · ayrıntı: rakip-analizi.md</span><span>04</span></div>
-</section>
 
-<!-- 5 FIYAT BANDI -->
-<section class="slide" id="s5" aria-label="Fiyat bandı">
-  <div class="inner">
-    <div class="eyebrow">Fiyat bandı</div>
-    <h2>Aylık fiyatlar 199 TL ile 7.200 TL arasında dağınık</h2>
-    <div class="grow wide-svg" style="display:grid;align-content:center">
-      <svg viewBox="0 0 1000 404" role="img" aria-label="Rakiplerin aylık fiyat aralıkları, Türk lirası">
-        <g class="grid">
+    <div class="chartbox reveal">
+      <svg viewBox="0 0 1000 410" role="img" aria-label="Rakiplerin aylık fiyat aralıkları, Türk lirası">
+        <g class="gl">
           <line x1="200" y1="30" x2="200" y2="366"/><line x1="352" y1="30" x2="352" y2="366"/><line x1="504" y1="30" x2="504" y2="366"/>
           <line x1="656" y1="30" x2="656" y2="366"/><line x1="808" y1="30" x2="808" y2="366"/><line x1="960" y1="30" x2="960" y2="366"/>
         </g>
-        <g font-size="13" class="t-mono" text-anchor="middle">
-          <text x="200" y="388" class="t-muted t-mono">0</text><text x="352" y="388" class="t-muted t-mono">1.500</text>
-          <text x="504" y="388" class="t-muted t-mono">3.000</text><text x="656" y="388" class="t-muted t-mono">4.500</text>
-          <text x="808" y="388" class="t-muted t-mono">6.000</text><text x="960" y="388" class="t-muted t-mono">7.500 TL</text>
+        <g font-size="13" text-anchor="middle">
+          <text x="200" y="390" class="mu mo">0</text><text x="352" y="390" class="mu mo">1.500</text><text x="504" y="390" class="mu mo">3.000</text>
+          <text x="656" y="390" class="mu mo">4.500</text><text x="808" y="390" class="mu mo">6.000</text><text x="960" y="390" class="mu mo">7.500 TL</text>
         </g>
-        <g font-size="16" text-anchor="end" font-weight="600">
+        <g font-size="16" text-anchor="end" font-weight="700">
           <text x="186" y="65">KatipAI</text><text x="186" y="111">Lawlera AI</text><text x="186" y="157">Judis AI</text>
-          <text x="186" y="203">Avudex</text><text x="186" y="249">C'esta Lex</text><text x="186" y="295" class="t-claret">Lexpera</text>
-          <text x="186" y="341">Lykos AI</text>
+          <text x="186" y="203">Avudex</text><text x="186" y="249">C'esta Lex</text><text x="186" y="295">Lexpera</text><text x="186" y="341">Lykos AI</text>
         </g>
-        <!-- bars: x = 200 + TL * 0.10133 -->
-        <rect x="220.2" y="54" width="30.4" height="12" rx="2" class="bar-gold"/>
-        <rect x="301.2" y="100" width="20.3" height="12" rx="2" class="bar-gold"/>
-        <rect x="337.8" y="146" width="172.3" height="12" rx="2" class="bar-gold"/>
-        <rect x="362.1" y="192" width="567.5" height="12" rx="2" class="bar-gold"/>
-        <rect x="453.2" y="238" width="152" height="12" rx="2" class="bar-gold"/>
-        <rect x="488.8" y="284" width="116.5" height="12" rx="2" class="bar-claret"/>
-        <rect x="504" y="330" width="304" height="12" rx="2" class="bar-gold"/>
-        <g font-size="13" class="t-muted">
-          <text x="220" y="46" class="t-muted">199 → 499 (KDV dahil)</text>
-          <text x="301" y="92" class="t-muted">999 + KDV</text>
-          <text x="338" y="138" class="t-muted">1.360–3.060 + KDV</text>
-          <text x="362" y="184" class="t-muted">1.600–7.200 (KDV dahil, kullanım hakkı)</text>
-          <text x="453" y="230" class="t-muted">2.499–3.999</text>
-          <text x="489" y="276" class="t-claret">yıllık 34.200–48.000 ÷ 12 = 2.850–4.000</text>
-          <text x="504" y="322" class="t-muted">3.000–6.000 + KDV</text>
-        </g>
-      </svg>
-    </div>
-    <p class="xs">Dışarıda kalanlar: Avarsis (abonelik yok, kredi paketi 500–40.000 TL), Kazancı, Legalbank ve Leagle (fiyat yayınlanmıyor), Ara Karar ve Argüman AI (ücretsiz katman). Çoğu teklif kotalı veya kredili; fiyat öngörülebilir değil.</p>
-  </div>
-  <div class="foot"><span class="src">Kaynak: satıcı fiyat sayfaları, 19.10.2026 · kampanya içerebilir</span><span>05</span></div>
-</section>
-
-<!-- 6 BOSLUKLAR -->
-<section class="slide" id="s6" aria-label="Boşluklar ve fırsat">
-  <div class="inner">
-    <div class="eyebrow">Fırsat</div>
-    <h2>Rakiplerin vaat edip ölçmediği dört alan</h2>
-    <div class="cols c2 grow">
-      <div class="gap-item">
-        <p class="q">"Bu künye gerçekten var mı?"</p>
-        <h3>Atıf doğrulama</h3>
-        <p class="body">Çoğu ürün "halüsinasyonsuz" diyor, bağımsız ölçüm yayınlamıyor. Tek istisna Avarsis'in kendi verdiği "%96,6 atıf doğrulandı" rakamı.</p>
-      </div>
-      <div class="gap-item">
-        <p class="q">"Bu karar hâlâ geçerli mi?"</p>
-        <h3>İçtihat değişim takibi</h3>
-        <p class="body">HGK veya İBK ile aşıldı mı, daire görüş değiştirdi mi? KeyCite veya Shepard's benzeri bir özellik hiçbir Türk rakipte bulunamadı.</p>
-      </div>
-      <div class="gap-item">
-        <p class="q">"Arama ne kadar iyi?"</p>
-        <h3>Ölçülmüş Türkçe arama kalitesi</h3>
-        <p class="body">Anlamsal arama artık standart, tek başına fark yaratmıyor. Türkçe çekim ve eş anlamlı terimler için bağımsız bir kıyaslama yok.</p>
-      </div>
-      <div class="gap-item">
-        <p class="q">"Ay sonunda ne ödeyeceğim?"</p>
-        <h3>Öngörülebilir fiyat</h3>
-        <p class="body">Abonelik, kredi ve kullanım hakkı karışık. Sınırsız arama sunan, orta segmentte sabit fiyatlı bir teklif boşluğu var.</p>
-      </div>
-    </div>
-  </div>
-  <div class="foot"><span class="src">Kaynak: rakip-analizi.md, bölüm 5</span><span>06</span></div>
-</section>
-
-<!-- 7 COZUM -->
-<section class="slide" id="s7" aria-label="Çözüm">
-  <div class="inner">
-    <div class="eyebrow">Çözüm</div>
-    <h2>YargitAI dört ayak üzerinde duruyor</h2>
-    <div class="cols c4 grow">
-      <div class="pillar">
-        <span class="ltr">a</span>
-        <h3>Hibrit arama</h3>
-        <p class="sm">Türkçe kök bulma ile BM25 anahtar kelime araması ve anlamsal vektör araması birlikte çalışır. Sonuçlar RRF (Reciprocal Rank Fusion) ile birleşir.</p>
-      </div>
-      <div class="pillar">
-        <span class="ltr">b</span>
-        <h3>Atıf grafiği</h3>
-        <p class="sm">Kararlar arası atıflar ve karardan kanun maddesine bağlar. Deterministik düzenli ifadelerle çıkarılır, LLM kullanılmaz.</p>
-        <p class="xs mono">E. 2021/…  K. 2022/…  →  4857 s. m.25</p>
-      </div>
-      <div class="pillar">
-        <span class="ltr">c</span>
-        <h3>Doğrulanmış cevap</h3>
-        <p class="sm">Her iddia gerçek bir esas/karar numarasına bağlanır. Veritabanında bulunmayan künye sessizce geçmez, "doğrulanamadı" diye kırmızıyla işaretlenir.</p>
-      </div>
-      <div class="pillar">
-        <span class="ltr">d</span>
-        <h3>İçtihat zaman çizelgesi</h3>
-        <p class="sm">Bir konunun yıllar içindeki seyri, dairenin bozma ve onama istatistiği. Görüş değişimi görünür olur.</p>
-      </div>
-    </div>
-  </div>
-  <div class="foot"><span>YargitAI</span><span>07</span></div>
-</section>
-
-<!-- 8 MIMARI -->
-<section class="slide" id="s8" aria-label="Mimari">
-  <div class="inner">
-    <div class="eyebrow">Mimari</div>
-    <h2>Kaynaktan doğrulanmış cevaba</h2>
-    <div class="grow wide-svg" style="display:grid;align-content:center">
-      <svg viewBox="0 0 1200 530" role="img" aria-label="Veri akışı: kaynaklar, ingest, SQLite, embedding, hibrit arama, FastAPI, web arayüz ve LLM cevap katmanı">
-        <defs>
-          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="fill-ink2"/></marker>
-          <marker id="ahg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="fill-gold"/></marker>
-          <marker id="ahc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="fill-claret"/></marker>
-        </defs>
-        <text x="20" y="24" font-size="12" class="t-muted t-mono" letter-spacing="2">KAYNAKLAR</text>
-        <g font-size="14">
-          <rect x="20" y="40" width="200" height="56" rx="3" class="box"/><text x="34" y="64" font-weight="600">Yargıtay</text><text x="34" y="84" font-size="12" class="t-muted">karararama</text>
-          <rect x="20" y="110" width="200" height="56" rx="3" class="box"/><text x="34" y="134" font-weight="600">Bedesten API</text><text x="34" y="154" font-size="12" class="t-muted">mevzuat.adalet.gov.tr arkası</text>
-          <rect x="20" y="180" width="200" height="56" rx="3" class="box"/><text x="34" y="204" font-weight="600">UYAP Emsal</text><text x="34" y="224" font-size="12" class="t-muted">emsal karar arama</text>
-          <rect x="20" y="250" width="200" height="56" rx="3" class="box"/><text x="34" y="274" font-weight="600">Danıştay</text><text x="34" y="294" font-size="12" class="t-muted">karar arama</text>
-          <rect x="20" y="320" width="200" height="56" rx="3" class="box-gold"/><text x="34" y="344" font-weight="600">Açık veri seti</text><text x="34" y="364" font-size="12" class="t-muted">Hugging Face, CC</text>
-        </g>
-        <g class="wire">
-          <path d="M220,68 C250,68 250,190 278,200" marker-end="url(#ah)"/>
-          <path d="M220,138 C250,138 250,200 278,204" marker-end="url(#ah)"/>
-          <path d="M220,208 L278,208" marker-end="url(#ah)"/>
-          <path d="M220,278 C250,278 250,216 278,212" marker-end="url(#ah)"/>
-        </g>
-        <path d="M220,348 C250,348 250,226 278,216" class="wire-gold" marker-end="url(#ahg)"/>
-
-        <rect x="280" y="150" width="180" height="120" rx="3" class="box"/>
-        <text x="296" y="178" font-size="16" font-weight="600">Ingest</text>
-        <text x="296" y="204" font-size="13" class="t-muted">akış halinde okuma</text>
-        <text x="296" y="226" font-size="13" class="t-muted">HTML → düz metin</text>
-        <text x="296" y="248" font-size="13" class="t-muted">zstd sıkıştırma</text>
-        <path d="M460,210 L518,210" class="wire" marker-end="url(#ah)"/>
-
-        <rect x="520" y="70" width="200" height="270" rx="3" class="box-ink"/>
-        <text x="538" y="100" font-size="17" class="t-on-ink" font-weight="600">SQLite</text>
+        <!-- x = 200 + TL × 0,10133 -->
+        <rect class="pb grow-x" x="220.2" y="54" width="30.4" height="14" rx="7"/>
+        <rect class="pb grow-x" x="301.2" y="100" width="20.3" height="14" rx="7"/>
+        <rect class="pb grow-x" x="337.8" y="146" width="172.3" height="14" rx="7"/>
+        <rect class="pb grow-x" x="362.1" y="192" width="567.5" height="14" rx="7"/>
+        <rect class="pb grow-x" x="453.2" y="238" width="152" height="14" rx="7"/>
+        <rect class="pl grow-x" x="488.8" y="284" width="116.5" height="14" rx="7"/>
+        <rect class="pb grow-x" x="504" y="330" width="304" height="14" rx="7"/>
+        <rect class="py" x="337" y="22" width="15" height="350" opacity=".22"/>
+        <text x="345" y="18" font-size="12.5" text-anchor="middle" font-weight="700" style="fill:var(--manila)">YargitAI önerisi</text>
         <g font-size="13">
-          <rect x="536" y="118" width="168" height="54" rx="2" class="fill-goldsoft"/>
-          <text x="548" y="141" font-weight="600">karar</text><text x="548" y="160" font-size="12" class="t-muted">metin + künye alanları</text>
-          <rect x="536" y="182" width="168" height="54" rx="2" class="fill-goldsoft"/>
-          <text x="548" y="205" font-weight="600">FTS5</text><text x="548" y="224" font-size="12" class="t-muted">tam metin dizini</text>
-          <rect x="536" y="246" width="168" height="78" rx="2" class="fill-goldsoft"/>
-          <text x="548" y="269" font-weight="600">atıf + madde grafiği</text><text x="548" y="288" font-size="12" class="t-muted">karar → karar</text><text x="548" y="306" font-size="12" class="t-muted">karar → kanun maddesi</text>
+          <text x="256" y="65" class="mu">199 → 499</text><text x="327" y="111" class="mu">999 + KDV</text>
+          <text x="516" y="157" class="mu">1.360–3.060 + KDV</text><text x="362" y="186" class="mu">1.600–7.200 (kullanım hakkı)</text>
+          <text x="612" y="249" class="mu">2.499–3.999</text><text x="612" y="295" class="mu">yıllık 34.200–48.000 ÷ 12</text>
+          <text x="814" y="341" class="mu">3.000–6.000 + KDV</text>
         </g>
+      </svg>
+    </div>
+    <p class="src">Kaynak: satıcı fiyat sayfaları, 19.10.2026 · ayrıntı: rakip-analizi.md</p>
+  </div>
+</section>
 
-        <path d="M720,120 L778,90" class="wire" marker-end="url(#ah)"/>
-        <rect x="780" y="40" width="180" height="90" rx="3" class="box"/>
-        <text x="796" y="68" font-size="16" font-weight="600">Embedding</text>
-        <text x="796" y="92" font-size="13" class="t-muted">bge-m3, GPU</text>
-        <text x="796" y="112" font-size="13" class="t-muted">anlamsal vektörler</text>
+<section id="firsat">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">Fırsat</p>
+      <h2>Rakiplerin vaat edip ölçmediği dört alan</h2>
+    </div>
+    <div class="grid g2">
+      <div class="gap reveal"><p class="q">"Bu künye gerçekten var mı?"</p><h3>Atıf doğrulama</h3><p class="muted small">Çoğu ürün "halüsinasyonsuz" diyor, bağımsız ölçüm yayınlamıyor. YargitAI her künyeyi veritabanında arar, bulamazsa açıkça işaretler.</p></div>
+      <div class="gap reveal"><p class="q">"Bu karar hâlâ geçerli mi?"</p><h3>İçtihat değişim takibi</h3><p class="muted small">HGK veya İBK ile aşıldı mı, daire görüş değiştirdi mi? Shepard's benzeri bir özellik hiçbir Türk rakipte yok.</p></div>
+      <div class="gap reveal"><p class="q">"Arama ne kadar iyi?"</p><h3>Ölçülmüş Türkçe arama</h3><p class="muted small">Anlamsal arama artık standart. Türkçe çekim ve eş anlamlı terimler için bağımsız bir kıyaslama yok; biz ölçüp yayınlayacağız.</p></div>
+      <div class="gap reveal"><p class="q">"Ay sonunda ne ödeyeceğim?"</p><h3>Öngörülebilir fiyat</h3><p class="muted small">Abonelik, kredi ve kullanım hakkı karışık. Sınırsız arama sunan sabit fiyatlı orta segment boş.</p></div>
+    </div>
+  </div>
+</section>
 
-        <path d="M720,240 L778,240" class="wire" marker-end="url(#ah)"/>
-        <path d="M870,130 L870,183" class="wire" marker-end="url(#ah)"/>
-        <rect x="780" y="185" width="180" height="120" rx="3" class="box-gold"/>
-        <text x="796" y="213" font-size="16" font-weight="600">Hibrit arama</text>
-        <text x="796" y="238" font-size="13" class="t-muted">kök bulma + BM25</text>
-        <text x="796" y="258" font-size="13" class="t-muted">+ vektör benzerliği</text>
-        <text x="796" y="282" font-size="13" class="t-gold" font-weight="600">RRF birleştirme</text>
+<section id="cozum" class="dark">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">Çözüm</p>
+      <h2>Dört ayak üzerinde duran bir araştırma motoru</h2>
+      <p class="lead">Grafı yapay zekâ tahmin etmez. Karar numaraları ve kanun maddeleri metinden kurallarla çıkarılır, dil modeli yalnız bu doğrulanmış zeminin üstünde konuşur.</p>
+    </div>
+    <div class="grid g4">
+      <div class="pillar reveal">
+        <div class="ic"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></div>
+        <h3>Hibrit arama</h3>
+        <p>Türkçe kök bulma ile BM25 ve bge-m3 anlamsal vektörleri birlikte çalışır, sonuçlar RRF ile birleşir.</p>
+      </div>
+      <div class="pillar reveal">
+        <div class="ic"><svg viewBox="0 0 24 24"><circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M7 7.5 10.5 16M17 7.5 13.5 16M7.5 6h9"/></svg></div>
+        <h3>Atıf grafiği</h3>
+        <p>Karardan karara ve karardan kanun maddesine bağlar. Daire, HGK, CGK ve İBK atıfları ayrı tanınır.</p>
+      </div>
+      <div class="pillar reveal">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg></div>
+        <h3>Doğrulanmış cevap</h3>
+        <p>Her tespit bir künyeye bağlanır. Veritabanında bulunmayan künye kırmızıyla "doğrulanamadı" olarak işaretlenir.</p>
+      </div>
+      <div class="pillar reveal">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M6 16V9M11 16V5M16 16v-4M21 16V8"/></svg></div>
+        <h3>İçtihat çizelgesi</h3>
+        <p>Bir kanun maddesine dayanan kararların yıllara göre onama ve bozma dağılımı; dairenin görüş değişimi görünür olur.</p>
+      </div>
+    </div>
 
-        <path d="M960,245 L1008,245" class="wire" marker-end="url(#ah)"/>
-        <rect x="1010" y="200" width="170" height="90" rx="3" class="box"/>
-        <text x="1026" y="238" font-size="16" font-weight="600">FastAPI</text>
-        <text x="1026" y="262" font-size="13" class="t-muted">arama ve cevap uçları</text>
+    <div class="arch reveal" aria-label="Mimari akış">
+      <svg viewBox="0 0 1200 470" role="img" aria-label="Kaynaklar ingest katmanına, oradan SQLite'a, embedding ve hibrit aramaya, FastAPI'ye ve web arayüzü ile doğrulamalı cevap katmanına akar">
+        <defs>
+          <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker>
+          <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ahr"/></marker>
+        </defs>
+        <text x="20" y="26" font-size="12" class="t2" letter-spacing="2" style="font-family:var(--mono)">KAYNAKLAR</text>
+        <g font-size="14">
+          <rect x="20" y="40" width="200" height="54" rx="10" class="bx"/><text x="36" y="63" font-weight="700">Yargıtay</text><text x="36" y="82" font-size="12" class="t2">karararama</text>
+          <rect x="20" y="106" width="200" height="54" rx="10" class="bx"/><text x="36" y="129" font-weight="700">Bedesten API</text><text x="36" y="148" font-size="12" class="t2">emsal-karar servisi</text>
+          <rect x="20" y="172" width="200" height="54" rx="10" class="bx"/><text x="36" y="195" font-weight="700">UYAP Emsal · Danıştay</text><text x="36" y="214" font-size="12" class="t2">aynı altyapı</text>
+          <rect x="20" y="238" width="200" height="54" rx="10" class="bx-m"/><text x="36" y="261" font-weight="700">Açık veri seti</text><text x="36" y="280" font-size="12" class="t2">Hugging Face, CC</text>
+        </g>
+        <path class="flow" d="M220,67 C252,67 252,160 280,165" marker-end="url(#a1)"/>
+        <path class="flow" d="M220,133 C250,133 250,170 280,172" marker-end="url(#a1)"/>
+        <path class="flow" d="M220,199 C250,199 250,180 280,179" marker-end="url(#a1)"/>
+        <path class="flow" d="M220,265 C252,265 252,190 280,186" marker-end="url(#a1)"/>
 
-        <path d="M1095,290 L1095,398" class="wire" marker-end="url(#ah)"/>
-        <path d="M1095,345 L875,345 L875,398" class="wire" marker-end="url(#ah)"/>
-        <rect x="780" y="400" width="190" height="80" rx="3" class="box"/>
-        <text x="796" y="434" font-size="16" font-weight="600">Web arayüz</text>
-        <text x="796" y="458" font-size="13" class="t-muted">avukat ekranı</text>
-        <rect x="1000" y="400" width="180" height="80" rx="3" class="box-claret"/>
-        <text x="1014" y="430" font-size="15" font-weight="600">LLM cevap katmanı</text>
-        <text x="1014" y="454" font-size="13" class="t-claret">atıf doğrulamalı</text>
+        <rect x="282" y="120" width="170" height="120" rx="12" class="bx"/>
+        <text x="298" y="150" font-size="16" font-weight="700">Ingest</text>
+        <text x="298" y="176" font-size="13" class="t2">akış hâlinde okuma</text>
+        <text x="298" y="197" font-size="13" class="t2">HTML → metin</text>
+        <text x="298" y="218" font-size="13" class="t2">zstd sıkıştırma</text>
+        <path class="flow" d="M452,180 L512,180" marker-end="url(#a1)"/>
 
-        <path d="M1090,480 L1090,508 L620,508 L620,342" class="wire-claret" marker-end="url(#ahc)"/>
-        <text x="640" y="500" font-size="13" class="t-claret">her künye veritabanında aranır; bulunmayan işaretlenir</text>
+        <rect x="514" y="50" width="210" height="270" rx="14" class="bx-m"/>
+        <text x="532" y="80" font-size="17" font-weight="700">SQLite</text>
+        <g font-size="13">
+          <rect x="530" y="96" width="178" height="52" rx="8" class="bx"/><text x="544" y="118" font-weight="700">karar</text><text x="544" y="137" font-size="12" class="t2">1,06M metin + künye</text>
+          <rect x="530" y="158" width="178" height="52" rx="8" class="bx"/><text x="544" y="180" font-weight="700">FTS5</text><text x="544" y="199" font-size="12" class="t2">Türkçe tam metin dizini</text>
+          <rect x="530" y="220" width="178" height="84" rx="8" class="bx"/><text x="544" y="242" font-weight="700">atıf grafiği</text><text x="544" y="262" font-size="12" class="t2">122 bin karar → karar</text><text x="544" y="282" font-size="12" class="t2">4,3M karar → madde</text>
+        </g>
+        <path class="flow" d="M724,110 L782,86" marker-end="url(#a1)"/>
+        <rect x="784" y="40" width="180" height="86" rx="12" class="bx"/>
+        <text x="800" y="68" font-size="16" font-weight="700">Embedding</text>
+        <text x="800" y="91" font-size="13" class="t2">bge-m3, GPU</text>
+        <text x="800" y="111" font-size="13" class="t2">35 karar/sn</text>
+        <path class="flow" d="M724,230 L782,230" marker-end="url(#a1)"/>
+        <path class="flow" d="M874,126 L874,174" marker-end="url(#a1)"/>
+        <rect x="784" y="176" width="180" height="110" rx="12" class="bx-m"/>
+        <text x="800" y="204" font-size="16" font-weight="700">Hibrit arama</text>
+        <text x="800" y="228" font-size="13" class="t2">kök + BM25</text>
+        <text x="800" y="248" font-size="13" class="t2">+ vektör benzerliği</text>
+        <text x="800" y="270" font-size="13" font-weight="700" style="fill:var(--mint-on-dark)">RRF birleştirme</text>
+        <path class="flow" d="M964,231 L1010,231" marker-end="url(#a1)"/>
+        <rect x="1012" y="190" width="168" height="84" rx="12" class="bx"/>
+        <text x="1028" y="226" font-size="16" font-weight="700">FastAPI</text>
+        <text x="1028" y="249" font-size="13" class="t2">ara · sor · karar · madde</text>
+        <path class="flow" d="M1096,274 L1096,356" marker-end="url(#a1)"/>
+        <path class="flow" d="M1096,316 L874,316 L874,356" marker-end="url(#a1)"/>
+        <rect x="784" y="358" width="180" height="74" rx="12" class="bx"/>
+        <text x="800" y="390" font-size="16" font-weight="700">Web arayüz</text>
+        <text x="800" y="412" font-size="13" class="t2">avukat ekranı</text>
+        <rect x="1004" y="358" width="176" height="74" rx="12" class="bx-r"/>
+        <text x="1018" y="388" font-size="15" font-weight="700">Claude cevap katmanı</text>
+        <text x="1018" y="410" font-size="13" style="fill:#FF8A6E">atıf doğrulamalı</text>
+        <path class="flow r" d="M1092,432 L1092,456 L618,456 L618,322" marker-end="url(#a2)"/>
+        <text x="636" y="448" font-size="13" style="fill:#FF8A6E">her künye veritabanında aranır; bulunmayan işaretlenir</text>
       </svg>
     </div>
   </div>
-  <div class="foot"><span>YargitAI · prototip mimarisi</span><span>08</span></div>
 </section>
 
-<!-- 9 VERI -->
-<section class="slide" id="s9" aria-label="Veri">
-  <div class="inner">
-    <div class="eyebrow">Veri</div>
-    <h2>Kamu kaynakları kırılgan, açık veri ile başlıyoruz</h2>
-    <div class="cols c-5-7 grow">
-      <div class="facts">
-        <div class="fact"><b>Tek altyapı, üç site.</b>Yargıtay, Danıştay ve UYAP Emsal karar arama siteleri aynı Adalet Bakanlığı altyapısını kullanıyor: <code>/aramalist</code> <code>/aramadetaylist</code> <code>/getDokuman</code>. reCAPTCHA tetiklenebiliyor.</div>
-        <div class="fact"><b>Bedesten gateway.</b><code>bedesten.adalet.gov.tr/emsal-karar/</code> altında <code>searchDocuments</code> ve <code>getDocumentContent</code>.</div>
-        <div class="alert"><b>19 Ekim 2026 gecesi</b> emsal-karar servisi kapalıydı (gateway 404). Bu yüzden sistem kendi kendini iyileştiren bir crawler ve açık veri setiyle başlıyor.</div>
-        <div class="fact"><b>Açık veri.</b><code>altaidevorg/yargitay-karar-data-raw</code> (Hugging Face, CC lisans): 2015–2023 arası yaklaşık 4,6 milyon Yargıtay kararı.</div>
+<section id="veri">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">Veri · ilk gece, 19 Ekim 2026</p>
+      <h2>Bir gecede bir milyon karar, gerçek bir atıf ağı</h2>
+      <p class="lead">Resmî içtihat servisi o gece kapalıydı. Sistem, Hugging Face'teki açık Yargıtay setiyle ayağa kalktı; resmî kaynak açıldığında crawler kendiliğinden devralacak.</p>
+    </div>
+    <div class="grid g2">
+      <div class="card reveal">
+        <h3>Karar yılına göre</h3>
+        <div class="bars">
+          <div class="r"><span>2021</span><span class="t"><i class="grow-x" style="width:100%"></i></span><span class="v">443.513</span></div>
+          <div class="r"><span>2022</span><span class="t"><i class="grow-x" style="width:77.7%"></i></span><span class="v">344.796</span></div>
+          <div class="r"><span>2023</span><span class="t"><i class="grow-x" style="width:56.0%"></i></span><span class="v">248.569</span></div>
+          <div class="r"><span>2020</span><span class="t"><i class="grow-x g" style="width:5.4%"></i></span><span class="v">23.800</span></div>
+        </div>
+        <p class="tiny">2020 satırı, 2021 dosyasında yer alan ama karar tarihi 2020 olan kayıtlar.</p>
       </div>
-      <div style="display:grid;align-content:center;gap:1cqi;min-width:0">
-        <p class="sm">Yıllara göre karar sayısı. <span class="gold" style="font-weight:600">Altın:</span> ilk faz, 2021–2023, yaklaşık 1,08 milyon karar.</p>
-        <div class="wide-svg">
-        <svg viewBox="0 0 900 350" role="img" aria-label="Yıllara göre Yargıtay karar sayısı, 2015-2023">
-          <g class="grid"><line x1="40" y1="300" x2="890" y2="300"/><line x1="40" y1="227.8" x2="890" y2="227.8" stroke-dasharray="2 4"/><line x1="40" y1="155.6" x2="890" y2="155.6" stroke-dasharray="2 4"/><line x1="40" y1="83.3" x2="890" y2="83.3" stroke-dasharray="2 4"/></g>
-          <g font-size="12" class="t-mono" text-anchor="end"><text x="36" y="231.8" class="t-muted t-mono">250 b</text><text x="36" y="159.6" class="t-muted t-mono">500 b</text><text x="36" y="87.3" class="t-muted t-mono">750 b</text></g>
-          <!-- y = 300 - n*0.000288889 -->
-          <rect x="60"  y="48.6"  width="64" height="251.4" class="bar"/>
-          <rect x="152" y="120.2" width="64" height="179.8" class="bar"/>
-          <rect x="244" y="126.0" width="64" height="174.0" class="bar"/>
-          <rect x="336" y="159.0" width="64" height="141.0" class="bar"/>
-          <rect x="428" y="152.4" width="64" height="147.6" class="bar"/>
-          <rect x="520" y="174.4" width="64" height="125.6" class="bar"/>
-          <rect x="612" y="162.7" width="64" height="137.3" class="bar-gold"/>
-          <rect x="704" y="196.9" width="64" height="103.1" class="bar-gold"/>
-          <rect x="796" y="227.6" width="64" height="72.4"  class="bar-gold"/>
-          <g font-size="13" text-anchor="middle" font-weight="500">
-            <text x="92"  y="40">870.150</text><text x="184" y="112">622.499</text><text x="276" y="118">602.402</text>
-            <text x="368" y="151">488.249</text><text x="460" y="144">510.852</text><text x="552" y="166">434.751</text>
-            <text x="644" y="155" class="t-gold">475.199</text><text x="736" y="189" class="t-gold">357.027</text><text x="828" y="220" class="t-gold">250.450</text>
-          </g>
-          <g font-size="13" text-anchor="middle" class="t-mono">
-            <text x="92" y="322" class="t-muted t-mono">2015</text><text x="184" y="322" class="t-muted t-mono">2016</text><text x="276" y="322" class="t-muted t-mono">2017</text>
-            <text x="368" y="322" class="t-muted t-mono">2018</text><text x="460" y="322" class="t-muted t-mono">2019</text><text x="552" y="322" class="t-muted t-mono">2020</text>
-            <text x="644" y="322" class="t-gold t-mono">2021</text><text x="736" y="322" class="t-gold t-mono">2022</text><text x="828" y="322" class="t-gold t-mono">2023</text>
-          </g>
-          <path d="M612,338 L860,338" class="wire-gold"/>
-        </svg>
+      <div class="card reveal">
+        <h3>Hüküm sonucu (metinden çıkarıldı)</h3>
+        <div class="bars">
+          <div class="r"><span>Onama</span><span class="t"><i class="grow-x" style="width:100%"></i></span><span class="v">330.344</span></div>
+          <div class="r"><span>Bozma</span><span class="t"><i class="grow-x r" style="width:90.3%"></i></span><span class="v">298.403</span></div>
+          <div class="r"><span>Düzelterek onama</span><span class="t"><i class="grow-x" style="width:15.1%"></i></span><span class="v">49.768</span></div>
+          <div class="r"><span>Kaldırma</span><span class="t"><i class="grow-x y" style="width:8.9%"></i></span><span class="v">29.505</span></div>
+          <div class="r"><span>Belirsiz</span><span class="t"><i class="grow-x g" style="width:99.8%"></i></span><span class="v">329.843</span></div>
+        </div>
+        <p class="tiny">Kararların %31'inde sonuç kalıbı henüz tanınmıyor; çıkarıcı geliştirilecek.</p>
+      </div>
+      <div class="card reveal">
+        <h3>En çok atıf alan kararlar</h3>
+        <div>
+          <div class="cite"><span><span class="kunye">9. HD 2023/3001 E., 2023/6593 K.</span></span><span class="n">5.659</span></div>
+          <div class="cite"><span><span class="kunye">CGK 2021/35 E., 2021/473 K.</span></span><span class="n">1.456</span></div>
+          <div class="cite"><span><span class="kunye">4. CD 2021/1361 E., 2021/9218 K.</span></span><span class="n">467</span></div>
+          <div class="cite"><span><span class="kunye">9. HD 2021/6396 E., 2021/10706 K.</span></span><span class="n">264</span></div>
+          <div class="cite"><span><span class="kunye">9. HD 2022/1773 E., 2022/2225 K.</span></span><span class="n">229</span></div>
+        </div>
+        <p class="tiny">Sağdaki sayı, bu karara atıf yapan ve veritabanında bulunan karar sayısı.</p>
+      </div>
+      <div class="card reveal">
+        <h3>Kaynaklar ve açık konular</h3>
+        <p class="small muted">Yargıtay, Danıştay ve UYAP Emsal arama siteleri aynı altyapıyı kullanıyor: <code>/aramalist</code>, <code>/aramadetaylist</code>, <code>/getDokuman</code>. Arka uçları <code>bedesten.adalet.gov.tr/emsal-karar</code>.</p>
+        <div class="alert">
+          <p class="small"><b>Servis kapalı.</b> 19 Ekim gecesi emsal-karar servisi gateway'de 404 veriyordu. Crawler 15 dakikada bir yokluyor.</p>
+          <p class="small"><b>HGK eksik.</b> Açık sette Hukuk Genel Kurulu kararı yok; 6.774 HGK atfı bu yüzden henüz bağlanamadı.</p>
         </div>
       </div>
     </div>
+    <p class="src">Kaynak: YargitAI veritabanı, 19.10.2026 · huggingface.co/datasets/altaidevorg/yargitay-karar-data-raw (CC)</p>
   </div>
-  <div class="foot"><span class="src">Kaynak: kaynak sitelerin teknik incelemesi (19.10.2026) · huggingface.co/datasets/altaidevorg/yargitay-karar-data-raw</span><span>09</span></div>
 </section>
 
-<!-- 10 HUKUKI ZEMIN -->
-<section class="slide" id="s10" aria-label="Hukuki zemin">
-  <div class="inner">
-    <div class="eyebrow">Hukuki zemin</div>
-    <h2>Kararlar serbest, kişisel veri korunur, avukat karar verir</h2>
-    <div class="cols c-7-5 grow">
-      <div class="cols c2" style="align-content:start">
-        <div class="law"><span class="art">FSEK m.31</span><p class="sm">Resmî makamların kararları serbestçe çoğaltılabilir ve yayılabilir. Karar metinlerini toplamak ve işlemek telif engeline takılmaz.</p></div>
-        <div class="law"><span class="art">KVKK</span><p class="sm">Kaynaktaki anonimleştirme eksik olabilir. Yayın öncesi ikinci bir anonimleştirme katmanı isim, T.C. kimlik no ve adresleri maskeler.</p></div>
-        <div class="law"><span class="art">Avukatlık Kanunu</span><p class="sm">Ürün avukatlara araştırma aracı olarak konumlanır. Vatandaşa hukuki danışmanlık verilmez.</p></div>
-        <div class="law"><span class="art">Emsal hiyerarşisi</span><p class="sm">Yalnız içtihadı birleştirme kararları bağlayıcıdır. Sistem her sonucun hiyerarşideki yerini etiketler.</p></div>
+<section id="hukuk" style="background:var(--surface);border-block:1px solid var(--line)">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">Hukuki zemin</p>
+      <h2>Kararlar serbest, kişisel veri korunur, kararı avukat verir</h2>
+    </div>
+    <div class="grid g2" style="align-items:center">
+      <div class="grid g2">
+        <div class="law reveal"><span class="art">FSEK m.31</span><p class="small muted">Resmî makam kararları serbestçe çoğaltılabilir ve yayılabilir.</p></div>
+        <div class="law reveal"><span class="art">KVKK</span><p class="small muted">Kaynaktaki anonimleştirme eksik olabilir; yayın öncesi ikinci bir anonimleştirme katmanı eklenir.</p></div>
+        <div class="law reveal"><span class="art">Avukatlık Kanunu</span><p class="small muted">Ürün avukata araştırma aracıdır; vatandaşa hukuki danışmanlık verilmez.</p></div>
+        <div class="law reveal"><span class="art">Emsal hiyerarşisi</span><p class="small muted">Yalnız içtihadı birleştirme kararları bağlayıcıdır. Her sonuç hiyerarşideki yeriyle etiketlenir.</p></div>
       </div>
-      <div style="display:grid;align-content:center;gap:1cqi">
-        <svg viewBox="0 0 520 300" role="img" aria-label="Emsal hiyerarşisi: İBK bağlayıcı, HGK ve CGK güçlü, daire kararları yol gösterici">
-          <polygon points="200,10 261.1,100 138.9,100" class="fill-claret"/>
-          <polygon points="138.9,104 261.1,104 322.1,190 77.9,190" class="fill-gold"/>
-          <polygon points="77.9,194 322.1,194 390,290 10,290" class="fill-rule"/>
-          <text x="200" y="78" text-anchor="middle" font-size="17" class="t-on-ink t-serif">İBK</text>
-          <text x="200" y="155" text-anchor="middle" font-size="17" class="t-on-ink t-serif">HGK / CGK</text>
-          <text x="200" y="250" text-anchor="middle" font-size="17" class="t-serif">Daire kararları</text>
-          <g font-size="14">
-            <line x1="270" y1="60" x2="400" y2="60" class="grid"/><text x="408" y="65" class="t-claret" font-weight="600">bağlayıcı</text>
-            <line x1="330" y1="148" x2="400" y2="148" class="grid"/><text x="408" y="153" class="t-gold" font-weight="600">güçlü</text>
-            <line x1="392" y1="242" x2="400" y2="242" class="grid"/><text x="408" y="247" class="t-muted" font-weight="600">yol gösterici</text>
-          </g>
-        </svg>
+      <div class="pyr reveal" role="img" aria-label="Emsal hiyerarşisi">
+        <div class="l1">İBK <span>bağlayıcı</span></div>
+        <div class="l2">HGK / CGK <span>güçlü</span></div>
+        <div class="l3">Daire kararları <span>yol gösterici</span></div>
       </div>
     </div>
   </div>
-  <div class="foot"><span class="src">5846 sayılı FSEK m.31 · 6698 sayılı KVKK · 1136 sayılı Avukatlık Kanunu</span><span>10</span></div>
 </section>
 
-<!-- 11 FARKLILASTIRICILAR -->
-<section class="slide" id="s11" aria-label="Farklılaştırıcı özellikler">
-  <div class="inner">
-    <div class="eyebrow">Ekran fikirleri · temsilî görünüm</div>
-    <h2>Avukatın sorduğu soruya göre tasarlanmış ekranlar</h2>
-    <div class="cols c4 grow">
-      <div class="mock">
-        <div class="mt"><h3>İçtihat haritası</h3></div>
-        <p class="xs">Bir dairenin bir konudaki görüşü yıl yıl</p>
-        <svg viewBox="0 0 220 120" aria-hidden="true">
-          <line x1="10" y1="60" x2="210" y2="60" class="grid"/>
-          <g class="fill-gold"><circle cx="20" cy="40" r="5"/><circle cx="45" cy="36" r="5"/><circle cx="70" cy="42" r="5"/><circle cx="95" cy="38" r="5"/></g>
-          <line x1="118" y1="14" x2="118" y2="106" class="wire-claret"/>
-          <g class="fill-claret"><circle cx="140" cy="82" r="5"/><circle cx="165" cy="86" r="5"/><circle cx="190" cy="80" r="5"/></g>
-          <text x="122" y="22" font-size="10" class="t-claret">HGK kararı</text>
-          <text x="10" y="116" font-size="10" class="t-muted t-mono">2015</text><text x="186" y="116" font-size="10" class="t-muted t-mono">2023</text>
-        </svg>
-        <p class="xs">Görüş değişimi işaretlenir, eski kararlar "aşılmış olabilir" etiketi alır.</p>
+<section id="model">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">İş modeli · öneri</p>
+      <h2>Sınırsız arama, sabit fiyat, orta segment</h2>
+      <p class="lead">Önce tek dikeyde kusursuz olmak: iş hukuku. Kıdem, ihbar, işe iade ve fazla çalışma davaları yüksek hacimli ve emsale en çok ihtiyaç duyulan alan.</p>
+    </div>
+    <div class="grid g3">
+      <div class="tier reveal">
+        <span class="badge">Bireysel avukat</span>
+        <span class="price">1.490 TL</span><span class="tiny">aylık, KDV hariç</span>
+        <ul><li>Sınırsız hibrit arama</li><li>Atıf grafiği ve madde analizi</li><li>Doğrulanmış cevap</li></ul>
       </div>
-      <div class="mock">
-        <div class="mt"><h3>Bozma sebebi analizi</h3></div>
-        <p class="xs">Bu dava türünde dairenin bozma gerekçeleri</p>
-        <svg viewBox="0 0 220 110" aria-hidden="true">
-          <g font-size="10"><text x="0" y="14" class="t-muted">Eksik inceleme</text><text x="0" y="48" class="t-muted">Delil değerlendirmesi</text><text x="0" y="82" class="t-muted">Hesaplama hatası</text></g>
-          <rect x="0" y="20" width="190" height="9" rx="1" class="bar-claret"/>
-          <rect x="0" y="54" width="130" height="9" rx="1" class="bar-claret" opacity=".75"/>
-          <rect x="0" y="88" width="80" height="9" rx="1" class="bar-claret" opacity=".55"/>
-        </svg>
-        <p class="xs">Dilekçe yazmadan önce en sık bozma sebebine karşı önlem alınır.</p>
+      <div class="tier hot reveal">
+        <span class="badge" style="background:var(--mint);color:#04211C">Büro · 3+ kullanıcı</span>
+        <span class="price">1.190 TL</span><span class="tiny">kullanıcı başı aylık, KDV hariç</span>
+        <ul><li>Bireysel paketteki her şey</li><li>Ortak klasörler, ekip yönetimi</li><li>Dilekçe analizi</li></ul>
       </div>
-      <div class="mock">
-        <div class="mt"><h3>Dilekçe yükle</h3></div>
-        <p class="xs">Taslak dilekçe okunur, iddialar çıkarılır</p>
-        <div class="row"><span>Lehte emsal</span><b class="gold">bulundu</b></div>
-        <div class="row"><span><span class="kunye">E. 2022/…</span></span><b>HGK</b></div>
-        <div class="row"><span>Aleyhte emsal</span><b class="claret">dikkat</b></div>
-        <div class="row"><span><span class="kunye">E. 2021/…</span></span><b>9. HD</b></div>
-        <p class="xs">Karşı tarafın dayanacağı kararlar önceden görünür.</p>
+      <div class="tier reveal">
+        <span class="badge">Kurumsal</span>
+        <span class="price">Teklif</span><span class="tiny">şirket hukuk departmanları</span>
+        <ul><li>Tek oturum açma</li><li>Kullanım raporu, API erişimi</li><li>Veri saklama taahhüdü</li></ul>
       </div>
-      <div class="mock">
-        <div class="mt"><h3>Mülga kanun uyarısı</h3></div>
-        <p class="xs">Atıf yapılan madde yürürlükte mi?</p>
-        <div class="banner"><b>1475 sayılı İş Kanunu</b><span>4857 sayılı Kanun ile yürürlükten kalktı. Yalnız m.14 (kıdem tazminatı) yürürlükte.</span></div>
-        <p class="xs">Karar eski kanuna dayanıyorsa kullanıcı uyarılır ve güncel karşılık maddesi gösterilir.</p>
-      </div>
+    </div>
+    <p class="src">Fiyatlar karar değil, öneridir: Judis Başlangıç (1.360 TL + KDV) ile C'esta Lex Standart (2.499 TL) arasında, kota ve kredi olmadan.</p>
+  </div>
+</section>
+
+<section id="yol" style="background:var(--surface);border-block:1px solid var(--line)">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">Yol haritası</p>
+      <h2>Prototip bu gece çalıştı. Sırada pilot avukatlar var.</h2>
+    </div>
+    <div class="road reveal">
+      <div class="phase done"><span class="w">Faz 0 · tamamlandı</span><h3>Prototip</h3><ul><li>1,06M karar veri hattı</li><li>Hibrit arama ve atıf grafiği</li><li>API, arayüz, madde analizi</li></ul></div>
+      <div class="phase"><span class="w">Faz 1 · 2–4 hafta</span><h3>İş hukuku</h3><ul><li>HGK kararları (Bedesten)</li><li>Değerlendirme seti</li><li>3–5 pilot avukat</li></ul></div>
+      <div class="phase"><span class="w">Faz 2</span><h3>Kapsam ve takip</h3><ul><li>Danıştay, AYM, BAM</li><li>İçtihat değişim takibi</li><li>Dilekçe analizi</li></ul></div>
+      <div class="phase"><span class="w">Faz 3</span><h3>İş akışı</h3><ul><li>UYAP ve UDF entegrasyonu</li><li>Kurumsal paket</li></ul></div>
     </div>
   </div>
-  <div class="foot"><span>Görseller temsilîdir, gerçek veri içermez</span><span>11</span></div>
 </section>
 
-<!-- 12 GO TO MARKET -->
-<section class="slide" id="s12" aria-label="Pazara giriş">
-  <div class="inner">
-    <div class="eyebrow">Pazara giriş</div>
-    <h2>Önce tek bir dikeyde kusursuz olmak</h2>
-    <div class="steps grow">
-      <div class="step now">
-        <span class="when">Başlangıç</span>
-        <h3>İş hukuku</h3>
-        <p class="sm">Yargıtay 9. Hukuk Dairesi ve Hukuk Genel Kurulu kararları. Kıdem, ihbar, işe iade, fazla mesai: yüksek hacim, net emsal ihtiyacı.</p>
-      </div>
-      <div class="step">
-        <span class="when">Doğrulama</span>
-        <h3>3-5 pilot avukat</h3>
-        <p class="sm">Gerçek dosyalarla haftalık geri bildirim. Arama kalitesi ve atıf doğruluğu ölçülür, rakamlar yayınlanır.</p>
-      </div>
-      <div class="step">
-        <span class="when">Genişleme</span>
-        <h3>Kira, icra, tazminat</h3>
-        <p class="sm">Aynı veri hattı ve atıf grafiği yeni dikeylere taşınır. Her dikey kendi değerlendirme setiyle açılır.</p>
-      </div>
-      <div class="step">
-        <span class="when">Ölçek</span>
-        <h3>Bürolar ve şirketler</h3>
-        <p class="sm">Çok kullanıcılı bürolar ve şirket hukuk departmanları. Ortak arşiv, ekip içi paylaşım.</p>
-      </div>
+<section id="risk">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">Riskler</p>
+      <h2>Bilinen riskler ve önlemleri</h2>
     </div>
-    <p class="xs">Avukatların yaklaşık yarısı İstanbul ve Ankara'da. İlk saha çalışması bu iki baroda yoğunlaşır.</p>
-  </div>
-  <div class="foot"><span>YargitAI</span><span>12</span></div>
-</section>
-
-<!-- 13 IS MODELI -->
-<section class="slide" id="s13" aria-label="İş modeli">
-  <div class="inner">
-    <div class="eyebrow">İş modeli · öneri</div>
-    <h2>Sınırsız arama, sabit fiyat, orta segment</h2>
-    <div class="tiers">
-      <div class="tier">
-        <span class="tag">Bireysel avukat</span>
-        <span class="price">1.490 TL</span><span class="per">aylık, KDV hariç · öneri</span>
-        <p class="sm">Sınırsız hibrit arama, atıf grafiği, doğrulanmış cevap, içtihat zaman çizelgesi.</p>
-      </div>
-      <div class="tier mid">
-        <span class="tag gold">Büro · 3+ kullanıcı</span>
-        <span class="price">1.190 TL</span><span class="per">kullanıcı başı aylık, KDV hariç · öneri</span>
-        <p class="sm">Bireysel paket, ortak klasörler, dilekçe analizi, ekip yönetimi.</p>
-      </div>
-      <div class="tier">
-        <span class="tag">Kurumsal</span>
-        <span class="price">Teklif</span><span class="per">şirket hukuk departmanları</span>
-        <p class="sm">Tek oturum açma, kullanım raporu, veri saklama taahhüdü, API erişimi.</p>
-      </div>
-    </div>
-    <div class="rule-top wide-svg">
-      <svg viewBox="0 0 960 74" role="img" aria-label="Önerilen fiyatların rakip bandındaki yeri">
-        <!-- x = 40 + TL * 0.12 -->
-        <line x1="40" y1="34" x2="940" y2="34" class="grid"/>
-        <rect x="99.9" y="28" width="804.1" height="12" rx="2" class="fill-goldsoft"/>
-        <text x="100" y="20" font-size="12" class="t-muted">Türk AI ürünleri aylık bandı: 499–7.200 TL</text>
-        <circle cx="182.8" cy="34" r="7" class="fill-gold"/><circle cx="218.8" cy="34" r="7" class="fill-gold"/>
-        <text x="200" y="64" font-size="12" text-anchor="middle" class="t-gold" font-weight="600">YargitAI önerisi</text>
-        <g font-size="11" class="t-mono"><text x="40" y="64" class="t-muted t-mono">0</text><text x="940" y="64" text-anchor="end" class="t-muted t-mono">7.500 TL</text></g>
-      </svg>
-    </div>
-    <p class="xs">Fiyatlar karar değil, öneridir. Judis Başlangıç (1.360 TL + KDV) ile C'esta Lex Standart (2.499 TL) arasına konumlanır; kota ve kredi yoktur.</p>
-  </div>
-  <div class="foot"><span class="src">Rakip fiyatları: satıcı siteleri, 19.10.2026</span><span>13</span></div>
-</section>
-
-<!-- 14 YOL HARITASI -->
-<section class="slide" id="s14" aria-label="Yol haritası">
-  <div class="inner">
-    <div class="eyebrow">Yol haritası</div>
-    <h2>Bu geceden kurumsal entegrasyona</h2>
-    <div class="steps grow">
-      <div class="step now">
-        <span class="when">Faz 0 · bu gece</span>
-        <h3>Prototip</h3>
-        <ul class="plain"><li>Veri hattı</li><li>Hibrit arama</li><li>Atıf grafiği</li><li>API ve arayüz prototipi</li></ul>
-      </div>
-      <div class="step">
-        <span class="when">Faz 1 · 2-4 hafta</span>
-        <h3>İş hukuku</h3>
-        <ul class="plain"><li>İş hukuku dikeyi kusursuz</li><li>Embedding</li><li>Pilot avukatlar</li></ul>
-      </div>
-      <div class="step">
-        <span class="when">Faz 2</span>
-        <h3>Kapsam ve takip</h3>
-        <ul class="plain"><li>Danıştay, AYM, BAM</li><li>İçtihat değişim takibi</li><li>Dilekçe analizi</li></ul>
-      </div>
-      <div class="step">
-        <span class="when">Faz 3</span>
-        <h3>İş akışı</h3>
-        <ul class="plain"><li>UYAP ve UDF entegrasyonu</li><li>Kurumsal paket</li></ul>
-      </div>
+    <div class="tablebox reveal">
+      <table class="risk">
+        <thead><tr><th>Risk</th><th>Neden önemli</th><th>Önlem</th></tr></thead>
+        <tbody>
+          <tr><td>Kaynak erişimi</td><td>reCAPTCHA tetikleniyor, servis kapanabiliyor (19.10.2026 gateway 404).</td><td>Açık veriyle başlangıç, yavaş ve kendini toparlayan crawler, resmî kurumlarla işbirliği.</td></tr>
+          <tr><td>Halüsinasyon</td><td>Uydurma künye avukatı soruşturmaya taşıyabiliyor.</td><td>Her künye veritabanında aranır, bulunmayan işaretlenir. Doğruluk oranı ölçülüp yayınlanır.</td></tr>
+          <tr><td>KVKK</td><td>Kaynak kararlarda anonimleştirme eksik olabilir.</td><td>İkinci anonimleştirme katmanı; kullanıcı belgeleriyle model eğitilmez.</td></tr>
+          <tr><td>Rekabet</td><td>UYAP AI devlet aracı, 30M+ karar. Rakipler 11–15M karar duyuruyor.</td><td>Fark veri miktarında değil, doğrulama ve içtihat takibinde.</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
-  <div class="foot"><span>YargitAI</span><span>14</span></div>
 </section>
 
-<!-- 15 RISKLER -->
-<section class="slide" id="s15" aria-label="Riskler ve önlemler">
-  <div class="inner">
-    <div class="eyebrow">Riskler</div>
-    <h2>Bilinen riskler ve önlemleri</h2>
-    <div style="overflow-x:auto">
-    <table class="risk">
-      <thead><tr><th>Risk</th><th>Neden önemli</th><th>Önlem</th></tr></thead>
-      <tbody>
-        <tr><td>Kaynak erişimi ve captcha</td><td>reCAPTCHA tetikleniyor, servis kapanabiliyor (19.10.2026 gateway 404).</td><td>Açık veri setiyle başlangıç, düşük hızlı ve kendini iyileştiren crawler, resmî kurumlarla işbirliği arayışı.</td></tr>
-        <tr><td>Halüsinasyon</td><td>Uydurma künye avukatı soruşturmaya taşıyabiliyor.</td><td>Her atıf veritabanında doğrulanır, bulunmayan "doğrulanamadı" diye işaretlenir. Doğruluk oranı ölçülüp yayınlanır.</td></tr>
-        <tr><td>KVKK</td><td>Kaynak kararlarda anonimleştirme eksik olabilir.</td><td>İkinci anonimleştirme katmanı, kullanıcı belgeleriyle model eğitilmez.</td></tr>
-        <tr><td>Rekabet</td><td>UYAP AI devlet aracı, 30M+ karar. Rakipler 11–15M karar duyuruyor.</td><td>UYAP AI'ın avukat erişimi belirsiz. Fark veri miktarında değil, doğrulama ve içtihat takibinde.</td></tr>
-      </tbody>
-    </table>
-    </div>
-  </div>
-  <div class="foot"><span>YargitAI</span><span>15</span></div>
-</section>
-
-<!-- 16 KAPANIS -->
-<section class="slide closing" id="s16" aria-label="Kapanış">
-  <div class="inner">
-    <div class="eyebrow">YargitAI</div>
+<section class="closing">
+  <div class="wrap reveal">
+    <p class="eyebrow" style="color:var(--mint-on-dark)">YargitAI</p>
     <h2>Her cevap <em>bir künyeyle.</em></h2>
-    <p class="kunye-line">Yargıtay · E. ____/____ · K. ____/____ · T. __.__.____ · doğrulandı</p>
-    <div style="display:grid;gap:.6cqi">
-      <p class="who">Murat Arslan</p>
-      <p class="mail">research@wpu.edu.tr</p>
+    <p class="k">Yargıtay · E. ____/____ · K. ____/____ · T. __.__.____ · doğrulandı</p>
+    <div class="contact">
+      <span>Murat Arslan</span>
+      <span class="mail" id="mail">research@wpu.edu.tr</span>
+      <button class="copy" id="copy" type="button">Adresi kopyala</button>
     </div>
   </div>
-  <div class="foot"><span>Ekim 2026</span><span>16</span></div>
 </section>
-
-</main>
-
-<nav class="nav" aria-label="Slayt gezinme">
-  <button type="button" id="prev" aria-label="Önceki slayt">&#8592;</button>
-  <button type="button" id="next" aria-label="Sonraki slayt">&#8594;</button>
-  <div class="track" id="track" role="progressbar" aria-valuemin="1" aria-valuemax="16" aria-valuenow="1"><span id="bar"></span></div>
-  <span class="counter" id="counter">1 / 16</span>
-  <span class="hint">← → · boşluk</span>
-</nav>
+<footer><div class="wrap"><span>YargitAI · prototip · Ekim 2026</span><span>Bu sayfa bir hukuki mütalaa değildir.</span></div></footer>
 
 <script>
 (function(){
-  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
-  var n = slides.length, i = 0;
-  var bar = document.getElementById('bar'), counter = document.getElementById('counter'), track = document.getElementById('track');
-  var prev = document.getElementById('prev'), next = document.getElementById('next');
-  var mq = window.matchMedia('(max-width: 760px), (max-height: 420px) and (max-width: 900px)');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function applyMode(){ document.body.classList.toggle('flow', mq.matches); }
-  function show(k){
-    i = Math.max(0, Math.min(n - 1, k));
-    slides.forEach(function(s, j){ s.classList.toggle('active', j === i); });
-    bar.style.width = ((i + 1) / n * 100) + '%';
-    counter.textContent = (i + 1) + ' / ' + n;
-    track.setAttribute('aria-valuenow', i + 1);
-    prev.disabled = i === 0; next.disabled = i === n - 1;
-    try { history.replaceState(null, '', '#s' + (i + 1)); } catch(e){}
+  // Görünüme giren bloklara giriş animasyonu (içerik zaten görünür durumda).
+  var io = 'IntersectionObserver' in window ? new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); countUp(e.target); } });
+  }, {threshold:.15}) : null;
+  document.querySelectorAll('.reveal').forEach(function(el){ io && io.observe(el); });
+
+  // Sayaçlar: son değer HTML'de; görünüme girince 0'dan kısa bir sayım oynar.
+  function countUp(root){
+    if(reduce) return;
+    root.querySelectorAll('[data-count]').forEach(function(el){
+      var end = +el.dataset.count, t0 = null, dur = 1400;
+      function step(t){ if(!t0) t0 = t; var p = Math.min(1,(t-t0)/dur), v = Math.round(end*(1-Math.pow(1-p,3)));
+        el.textContent = v.toLocaleString('tr-TR'); if(p<1) requestAnimationFrame(step); }
+      requestAnimationFrame(step);
+    });
   }
-  prev.addEventListener('click', function(){ show(i - 1); });
-  next.addEventListener('click', function(){ show(i + 1); });
-  track.addEventListener('click', function(e){
-    var r = track.getBoundingClientRect();
-    show(Math.floor((e.clientX - r.left) / r.width * n));
-  });
-  document.addEventListener('keydown', function(e){
-    if (document.body.classList.contains('flow')) return;
-    var k = e.key;
-    if (k === 'ArrowRight' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) { e.preventDefault(); show(i + 1); }
-    else if (k === 'ArrowLeft' || k === 'PageUp' || (k === ' ' && e.shiftKey)) { e.preventDefault(); show(i - 1); }
-    else if (k === 'Home') { e.preventDefault(); show(0); }
-    else if (k === 'End') { e.preventDefault(); show(n - 1); }
-  });
-  var sx = null, sy = null;
-  document.getElementById('stage').addEventListener('touchstart', function(e){
-    if (e.touches.length !== 1) return; sx = e.touches[0].clientX; sy = e.touches[0].clientY;
-  }, {passive:true});
-  document.getElementById('stage').addEventListener('touchend', function(e){
-    if (sx === null || document.body.classList.contains('flow')) { sx = null; return; }
-    var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
-    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) show(i + (dx < 0 ? 1 : -1));
-    sx = null;
-  }, {passive:true});
 
-  var m = /^#s(\d+)$/.exec(location.hash || '');
-  if (mq.addEventListener) mq.addEventListener('change', applyMode); else if (mq.addListener) mq.addListener(applyMode);
-  applyMode();
-  show(m ? parseInt(m[1], 10) - 1 : 0);
+  // Künye doğrulama demosu: yaz → mühürle, döngü.
+  function typeRow(row, done){
+    var c = row.querySelector('.c'), txt = c.dataset.text, i = 0;
+    row.classList.add('typing'); c.textContent = '';
+    (function tick(){ c.textContent = txt.slice(0, ++i);
+      if(i < txt.length) setTimeout(tick, 28 + Math.random()*30);
+      else setTimeout(function(){ row.classList.remove('typing'); setTimeout(done, 1700); }, 350);
+    })();
+  }
+  if(!reduce){
+    var r1 = document.getElementById('r1'), r2 = document.getElementById('r2');
+    function loop(){ typeRow(r1, function(){ typeRow(r2, function(){ setTimeout(loop, 2600); }); }); }
+    setTimeout(loop, 1800);
+  }
+
+  // Kahraman bandında yavaşça dolaşan atıf ağı.
+  var cv = document.getElementById('net'), ctx = cv.getContext('2d'), nodes = [], W, H, dpr;
+  function size(){ dpr = Math.min(2, window.devicePixelRatio||1); W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = W*dpr; cv.height = H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+    var n = Math.round(Math.min(70, W*H/16000)); nodes = [];
+    for(var i=0;i<n;i++) nodes.push({x:Math.random()*W, y:Math.random()*H, vx:(Math.random()-.5)*.25, vy:(Math.random()-.5)*.25, r:Math.random()<.12?2.6:1.4});
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    for(var i=0;i<nodes.length;i++){ var a = nodes[i];
+      if(!reduce){ a.x += a.vx; a.y += a.vy; if(a.x<0||a.x>W) a.vx*=-1; if(a.y<0||a.y>H) a.vy*=-1; }
+      for(var j=i+1;j<nodes.length;j++){ var b = nodes[j], dx=a.x-b.x, dy=a.y-b.y, d=dx*dx+dy*dy;
+        if(d<17000){ ctx.strokeStyle='rgba(75,224,190,'+(0.16*(1-d/17000))+')'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); } }
+      ctx.fillStyle = a.r>2 ? 'rgba(233,169,21,.85)' : 'rgba(75,224,190,.55)';
+      ctx.beginPath(); ctx.arc(a.x,a.y,a.r,0,6.283); ctx.fill();
+    }
+    if(!reduce) requestAnimationFrame(draw);
+  }
+  size(); draw(); window.addEventListener('resize', function(){ size(); if(reduce) draw(); });
+
+  // E-posta kopyalama.
+  document.getElementById('copy').addEventListener('click', function(){
+    var btn = this, txt = document.getElementById('mail').textContent;
+    function ok(){ btn.textContent = 'Kopyalandı'; setTimeout(function(){ btn.textContent = 'Adresi kopyala'; }, 1800); }
+    function fallback(){ var r = document.createRange(); r.selectNodeContents(document.getElementById('mail'));
+      var s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = 'Seçildi, kopyalayın'; }
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, fallback); else fallback();
+  });
 })();
 </script>
