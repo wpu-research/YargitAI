@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YargitAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f4ef; --panel:#ffffff; --ink:#14213d; --muted:#5b6475; --line:#e3ded3;
+  --accent:#9c2f2f; --gold:#b08a3e; --ok:#2f6f4f; --bad:#9c2f2f; --chip:#efe9dc;
+  --shadow:0 1px 2px rgba(20,33,61,.06),0 4px 16px rgba(20,33,61,.05);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1524; --panel:#161e31; --ink:#e8e4da; --muted:#9aa3b5; --line:#263049;
+  --accent:#e07a6a; --gold:#d4b06a; --ok:#6fbf94; --bad:#e07a6a; --chip:#1f2940; --shadow:none;}}
+:root[data-theme="dark"]{
+  --bg:#0f1524; --panel:#161e31; --ink:#e8e4da; --muted:#9aa3b5; --line:#263049;
+  --accent:#e07a6a; --gold:#d4b06a; --ok:#6fbf94; --bad:#e07a6a; --chip:#1f2940; --shadow:none;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 Inter,system-ui,sans-serif}
+header{display:flex;align-items:center;gap:16px;padding:14px 24px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:5}
+.logo{font-family:Fraunces,Georgia,serif;font-size:22px;font-weight:650;letter-spacing:.2px}
+.logo span{color:var(--accent)}
+nav{display:flex;gap:4px;margin-left:auto}
+nav button{background:none;border:0;color:var(--muted);font:inherit;padding:8px 12px;border-radius:8px;cursor:pointer}
+nav button.on{background:var(--chip);color:var(--ink);font-weight:600}
+main{max-width:1280px;margin:0 auto;padding:20px 24px}
+.bar{display:flex;gap:8px;flex-wrap:wrap}
+.bar input[type=search],.bar textarea{flex:1 1 420px;min-width:0;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);font:inherit}
+.bar textarea{min-height:76px;resize:vertical}
+.bar select,.bar input[type=number]{padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);font:inherit;max-width:100%}
+.bar input[type=number]{width:96px}
+.btn{padding:11px 18px;border:0;border-radius:10px;background:var(--ink);color:var(--bg);font:inherit;font-weight:600;cursor:pointer}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:20px;margin-top:18px}
+@media (max-width:900px){.grid{grid-template-columns:1fr} main{padding:16px} header{padding:12px 16px}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+.hit{padding:14px 16px;border-bottom:1px solid var(--line);cursor:pointer}
+.hit:last-child{border-bottom:0}
+.hit:hover,.hit.sel{background:var(--chip)}
+.kunye{font-weight:600}
+.meta{color:var(--muted);font-size:13px;display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 6px}
+.chip{display:inline-block;padding:1px 8px;border-radius:99px;background:var(--chip);font-size:12px;color:var(--muted)}
+.chip.bozma{color:var(--bad)} .chip.onama{color:var(--ok)} .chip.kurul{color:var(--gold);font-weight:600}
+.snip{font-size:14px;color:var(--ink);opacity:.9}
+.detail{padding:18px 20px;max-height:calc(100vh - 150px);overflow:auto;position:sticky;top:80px}
+.detail h2{font-family:Fraunces,Georgia,serif;font-size:20px;margin:0 0 6px}
+.metin{white-space:pre-wrap;font-size:14px;line-height:1.65;border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+mark{background:color-mix(in srgb,var(--gold) 35%,transparent);color:inherit;border-radius:2px}
+h3{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:16px 0 6px}
+.link{color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.answer{padding:18px 20px;white-space:pre-wrap}
+.warn{border-left:3px solid var(--bad);padding:8px 12px;background:var(--chip);margin:10px 0;border-radius:6px}
+.empty{padding:40px;text-align:center;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;margin-top:18px}
+.stats .card{padding:16px}
+.big{font-family:Fraunces,Georgia,serif;font-size:34px;font-weight:650}
+.row{display:flex;justify-content:space-between;gap:8px;font-size:14px;padding:3px 0}
+.barv{height:8px;background:var(--gold);border-radius:4px;margin-top:2px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Yargit<span>AI</span></div>
+  <nav>
+    <button data-tab="ara" class="on">Emsal Ara</button>
+    <button data-tab="sor">Soru Sor</button>
+    <button data-tab="istatistik">Veri</button>
+  </nav>
+</header>
+<main>
+  <section id="tab-ara">
+    <form class="bar" id="f-ara">
+      <input type="search" id="q" placeholder='örn. haklı nedenle fesih fazla mesai ispat  ·  "tam ifade" için tırnak' autofocus>
+      <select id="daire"><option value="">Tüm daireler</option></select>
+      <select id="sonuc"><option value="">Tüm sonuçlar</option><option value="onama">Onama</option><option value="bozma">Bozma</option><option value="duzelterek_onama">Düzelterek onama</option></select>
+      <input type="number" id="ymin" placeholder="Yıl ≥" min="2000" max="2030">
+      <input type="text" id="kanun" placeholder="Kanun/madde ör. 4857/17" style="padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);width:170px">
+      <button class="btn">Ara</button>
+    </form>
+    <div class="grid">
+      <div class="card" id="hits"><div class="empty">Bir konu, olay ya da hukuki soru yazın.</div></div>
+      <div class="card detail" id="detail"><div class="empty">Kararı açmak için soldan seçin.</div></div>
+    </div>
+  </section>
+
+  <section id="tab-sor" class="hidden">
+    <form class="bar" id="f-sor">
+      <textarea id="soru" placeholder="örn. İşçinin fazla mesai alacağı tanık beyanıyla ispatlanabilir mi, hakkaniyet indirimi nasıl uygulanır?"></textarea>
+      <button class="btn">Sor</button>
+    </form>
+    <div class="grid">
+      <div class="card answer" id="cevap"><div class="empty">Cevaplar yalnız veritabanındaki kararlara dayanır; her künye doğrulanır.</div></div>
+      <div class="card" id="cevap-kararlar"></div>
+    </div>
+  </section>
+
+  <section id="tab-istatistik" class="hidden"><div class="stats" id="stats"></div></section>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>(s??'').toString().replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const SONUC={onama:'Onama',bozma:'Bozma',duzelterek_onama:'Düzelterek onama',kismen_bozma:'Kısmen bozma',esastan_ret:'Esastan ret',temyiz_ret:'Temyiz ret',kaldirma:'Kaldırma'};
+const trDate=d=>d?d.split('-').reverse().join('.'):'';
+let lastQ='';
+
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  ['ara','sor','istatistik'].forEach(t=>$('#tab-'+t).classList.toggle('hidden',t!==b.dataset.tab));
+  if(b.dataset.tab==='istatistik') loadStats();
+});
+
+function chips(h){
+  const out=[];
+  if(h.sonuc) out.push(`<span class="chip ${h.sonuc.includes('bozma')?'bozma':'onama'}">${SONUC[h.sonuc]||h.sonuc}</span>`);
+  if(/Genel Kurul|Birleştirme/.test(h.daire)) out.push('<span class="chip kurul">Kurul kararı</span>');
+  if(h.atif_alan) out.push(`<span class="chip">${h.atif_alan} kez atıf aldı</span>`);
+  if(h.dava_turu) out.push(`<span class="chip">${esc(h.dava_turu)}</span>`);
+  return out.join(' ');
+}
+
+function hitHtml(h){
+  return `<div class="hit" data-rid="${h.rid}"><div class="kunye">${esc(h.kunye)}</div>
+    <div class="meta">${chips(h)}</div><div class="snip">${highlight(esc(h.snippet))}</div></div>`;
+}
+
+function highlight(html){
+  const words=lastQ.toLocaleLowerCase('tr').match(/[0-9a-zçğıöşü]{3,}/g)||[];
+  let out=html;
+  for(const w of words){
+    const stem=w.slice(0,Math.max(4,Math.min(w.length-1,7)));
+    out=out.replace(new RegExp('('+stem.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'[0-9a-zçğıöşü]*)','gi'),'<mark>$1</mark>');
+  }
+  return out;
+}
+
+$('#f-ara').onsubmit=async e=>{
+  e.preventDefault();
+  lastQ=$('#q').value.trim(); if(!lastQ) return;
+  const p=new URLSearchParams({q:lastQ});
+  if($('#daire').value) p.set('daire',$('#daire').value);
+  if($('#sonuc').value) p.set('sonuc',$('#sonuc').value);
+  if($('#ymin').value) p.set('yil_min',$('#ymin').value);
+  const km=$('#kanun').value.trim().split('/'); if(km[0]){p.set('kanun',km[0]); if(km[1]) p.set('madde',km[1]);}
+  $('#hits').innerHTML='<div class="empty">Aranıyor…</div>';
+  const r=await fetch('/api/ara?'+p); const hits=await r.json();
+  $('#hits').innerHTML=hits.length?hits.map(hitHtml).join(''):'<div class="empty">Sonuç yok. Daha genel terimler deneyin.</div>';
+  bindHits('#hits');
+};
+
+function bindHits(sel){
+  document.querySelectorAll(sel+' .hit').forEach(el=>el.onclick=()=>{
+    document.querySelectorAll('.hit.sel').forEach(x=>x.classList.remove('sel'));
+    el.classList.add('sel'); openKarar(el.dataset.rid);
+  });
+}
+
+async function openKarar(rid){
+  const tgt=$('#tab-ara').classList.contains('hidden')?$('#cevap-kararlar'):$('#detail');
+  if(tgt.id==='cevap-kararlar'){ $('nav button[data-tab=ara]').click(); }
+  const d=await (await fetch('/api/karar/'+rid)).json();
+  const at=d.atif_yaptigi.map(a=>{
+    const lbl=`${a.tur==='daire'?esc(a.hedef_daire):a.tur} ${esc(a.esas_no)} E., ${esc(a.karar_no)} K.`;
+    return `<div class="row"><span>${a.hedef_rid?`<span class="link" data-rid="${a.hedef_rid}">${lbl}</span>`:lbl}</span>
+      <span class="chip">${a.hedef_rid?'veritabanında':'kapsam dışı'}</span></div>`;}).join('')||'<div class="meta">Atıf bulunamadı.</div>';
+  const ab=d.atif_alan.map(a=>`<div class="row"><span class="link" data-rid="${a.rid}">${esc(a.kunye)}</span><span class="chip">${SONUC[a.sonuc]||''}</span></div>`).join('')||'<div class="meta">Henüz atıf alan karar yok.</div>';
+  const md=d.maddeler.map(m=>`<span class="chip">${m.kanun}${m.madde?' m.'+m.madde:''}</span>`).join(' ');
+  $('#detail').innerHTML=`<h2>${esc(d.kunye)}</h2><div class="meta">${chips(d)}</div>
+    <h3>Dayandığı kanun maddeleri</h3><div>${md||'<span class="meta">—</span>'}</div>
+    <h3>Atıf yaptığı kararlar</h3>${at}
+    <h3>Bu karara atıf yapanlar</h3>${ab}
+    <div class="metin">${highlight(esc(d.metin))}</div>`;
+  $('#detail').scrollTop=0;
+  $('#detail').querySelectorAll('.link').forEach(l=>l.onclick=()=>openKarar(l.dataset.rid));
+}
+
+$('#f-sor').onsubmit=async e=>{
+  e.preventDefault();
+  const soru=$('#soru').value.trim(); if(!soru) return; lastQ=soru;
+  $('#cevap').innerHTML='<div class="empty">Kararlar taranıyor ve cevap hazırlanıyor…</div>'; $('#cevap-kararlar').innerHTML='';
+  const r=await (await fetch('/api/sor',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({soru})})).json();
+  const mod=r.mod==='llm'?`<div class="meta">Model: ${esc(r.model)} · ${r.dogrulama.length?'':'tüm künyeler doğrulandı'}</div>`
+    :r.mod==='cikarimsal'?'<div class="meta">LLM anahtarı tanımlı değil: kararlardan doğrudan alıntılanan pasajlar gösteriliyor.</div>':'';
+  const warn=(r.dogrulama||[]).map(v=>`<div class="warn">Doğrulanamadı: ${esc(v.metin)}</div>`).join('');
+  $('#cevap').innerHTML=mod+warn+esc(r.cevap).replace(/\[(K\d+)\]/g,'<span class="chip kurul">$1</span>');
+  $('#cevap-kararlar').innerHTML=r.kararlar.map(k=>hitHtml({...k,daire:k.kunye}).replace('class="kunye">','class="kunye">'+k.ref+' · ')).join('');
+  bindHits('#cevap-kararlar');
+};
+
+async function loadStats(){
+  const s=await (await fetch('/api/istatistik')).json();
+  const bars=(arr,key,lab)=>{const m=Math.max(...arr.map(x=>x.n),1);return arr.map(x=>`<div class="row"><span>${esc(lab?lab(x[key]):x[key])}</span><span>${x.n.toLocaleString('tr')}</span></div><div class="barv" style="width:${100*x.n/m}%"></div>`).join('');};
+  $('#stats').innerHTML=`
+    <div class="card"><h3>Toplam karar</h3><div class="big">${s.toplam.toLocaleString('tr')}</div>
+      <div class="meta">${s.atif[0].toLocaleString('tr')} karar→karar atfı · ${s.atif[1].toLocaleString('tr')} tanesi veritabanındaki karara bağlı</div>
+      ${s.kaynak.map(k=>`<div class="row"><span>${esc(k.kaynak)}</span><span>${k.n.toLocaleString('tr')}</span></div>`).join('')}</div>
+    <div class="card"><h3>Yıllara göre</h3>${bars(s.yil,'yil')}</div>
+    <div class="card"><h3>Sonuç dağılımı</h3>${bars(s.sonuc,'sonuc',x=>SONUC[x]||x)}</div>
+    <div class="card"><h3>Daireler</h3>${bars(s.daire.slice(0,15),'daire')}</div>
+    <div class="card"><h3>En çok atıf alan kararlar</h3>${s.en_cok_atif.map(k=>`<div class="row"><span class="link" data-rid="${k.rid}">${esc(k.daire)} ${esc(k.esas_no)} E.</span><span>${k.n}</span></div>`).join('')}</div>`;
+  $('#stats').querySelectorAll('.link').forEach(l=>l.onclick=()=>{$('nav button[data-tab=ara]').click();openKarar(l.dataset.rid);});
+}
+
+fetch('/api/istatistik').then(r=>r.json()).then(s=>{
+  $('#daire').innerHTML+=s.daireler.map(d=>`<option>${esc(d)}</option>`).join('');
+});
+</script>
+</body>
+</html>
