@@ -33,8 +33,10 @@ python3 -m venv --system-site-packages .venv && .venv/bin/pip install -r require
 
 `scripts/gece_hatti.sh`: ingest bitince graf + embedding adımlarını sırayla çalıştırır.
 
-LLM cevapları için `ANTHROPIC_API_KEY` (veya `ant auth login`) gerekir; model `YARGITAI_MODEL` ile değişir
-(varsayılan `claude-opus-5-5`). Anahtar yoksa `/api/sor` kararlardan doğrudan pasaj döndürür.
+LLM cevapları için `ANTHROPIC_API_KEY` (veya `ant auth login`) ya da `NVIDIA_API_KEY` gerekir; anahtarlar
+ortamdan veya proje kökündeki `.env`'den (git dışı) okunur. İkisi de varsa Claude seçilir, `YARGITAI_LLM=nvidia`
+ile zorlanır. Modeller: `YARGITAI_MODEL` (varsayılan `claude-opus-5-5`), `YARGITAI_NVIDIA_MODEL`
+(varsayılan `nvidia/nemotron-3-ultra-550b-a55b`). Anahtar yoksa `/api/sor` kararlardan doğrudan pasaj döndürür.
 
 ## Kaynak notları (19.10.2026)
 

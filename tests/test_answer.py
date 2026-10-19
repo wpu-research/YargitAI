@@ -44,7 +44,7 @@ def fake_anthropic(monkeypatch):
     mod = types.ModuleType("anthropic")
     mod.Anthropic = FakeClient
     monkeypatch.setitem(sys.modules, "anthropic", mod)
-    monkeypatch.setattr(answer, "_llm_available", lambda: True)
+    monkeypatch.setattr(answer, "_provider", lambda: "anthropic")
     FakeClient.calls.clear()
     FakeClient.stop_reason = "end_turn"
     return FakeClient
@@ -76,6 +76,38 @@ def test_llm_refusal_falls_back_to_extractive(con, fake_anthropic, monkeypatch):
     r = answer.answer(con, "fazla çalışma tanık hakkaniyet indirimi")
     assert r["mod"] == "cikarimsal"
     assert "[K1]" in r["cevap"]
+
+
+def test_verify_unicode_tire(con):
+    issues = answer.verify(con, "HGK 2015/9\u20112698 E., 2017/1557 K. sayılı karar", 0)
+    assert [i["tur"] for i in issues] == ["dogrulanamayan_kunye"]
+
+
+def test_nvidia_provider(con, monkeypatch):
+    _no_vectors(monkeypatch)
+    calls = []
+
+    class FakeOpenAI:
+        def __init__(self, **kw):
+            calls.append(kw)
+            self.chat = types.SimpleNamespace(completions=types.SimpleNamespace(create=self._create))
+
+        def _create(self, **kw):
+            calls.append(kw)
+            msg = types.SimpleNamespace(content="Hakkaniyet indirimi uygulanır [K1].")
+            return types.SimpleNamespace(choices=[types.SimpleNamespace(finish_reason="stop", message=msg)])
+
+    mod = types.ModuleType("openai")
+    mod.OpenAI = FakeOpenAI
+    monkeypatch.setitem(sys.modules, "openai", mod)
+    for k in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "YARGITAI_LLM"):
+        monkeypatch.delenv(k, raising=False)
+    monkeypatch.setattr(answer.os.path, "exists", lambda p: False)
+    monkeypatch.setenv("NVIDIA_API_KEY", "test")
+    r = answer.answer(con, "fazla çalışma tanık hakkaniyet indirimi")
+    assert r["mod"] == "llm" and r["model"] == answer.NVIDIA_MODEL and r["dogrulama"] == []
+    assert calls[0]["base_url"] == answer.NVIDIA_URL
+    assert calls[1]["messages"][0]["content"] == answer.SYSTEM
 
 
 def test_seri_davalar_tek_satir(monkeypatch):
