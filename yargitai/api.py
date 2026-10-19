@@ -42,13 +42,14 @@ async def giris_kontrolu(request: Request, call_next):
 
 
 GIRIS_HTML = """<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>YargitAI · Giriş</title><style>
-body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0C3F48;color:#EAF6F4;font:16px system-ui,sans-serif;padding:16px}
+<title>YargitAI · Giriş</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;700&display=swap"><style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0C3F48;color:#EAF6F4;font:16px Figtree,system-ui,sans-serif;padding:16px}
 form{background:#0A2F36;border:1px solid #1E4A52;border-radius:16px;padding:28px;display:grid;gap:14px;width:min(360px,100%)}
-h1{margin:0;font-family:Georgia,serif;font-weight:400}h1 b{color:#4BE0BE;font-weight:400}
+h1{margin:0;font-family:"Young Serif",Georgia,serif;font-weight:400;font-size:32px}h1 b{color:#4BE0BE;font-weight:400}
 input{padding:12px;border-radius:10px;border:1px solid #1E4A52;background:#06252B;color:inherit;font:inherit}
 button{padding:12px;border:0;border-radius:999px;background:#4BE0BE;color:#062A2F;font-weight:700;font:inherit;font-weight:700;cursor:pointer}
-p{margin:0;color:#9CC3C2;font-size:14px}.e{color:#FF8A6E}</style></head><body>
+p{margin:0;color:#9CC3C2;font-size:14px}.e{color:#FF8A6E}label{font-size:13px;color:#9CC3C2}</style></head><body>
 <form method="post" action="/giris"><h1>Yargit<b>AI</b></h1><p>Pilot erişimi için size verilen davet kodunu girin.</p>
 <label for="kod" class="sr">Davet kodu</label><input id="kod" name="kod" autocomplete="one-time-code" required>{hata}<button>Giriş</button></form></body></html>"""
 
