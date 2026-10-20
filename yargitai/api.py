@@ -118,8 +118,30 @@ class Soru(BaseModel):
     yil_max: int | None = None
 
 
+_SINIR: dict[str, list[float]] = {}
+
+
+def _hiz_siniri(request: Request, dakika: int = 6, gun: int = 80) -> None:
+    """LLM kotası herkese açık: IP başına dakikada `dakika`, günde `gun` soru. Süreç belleğinde tutulur."""
+    ip = (request.headers.get("x-real-ip")
+          or request.headers.get("x-forwarded-for", "").split(",")[-1].strip()
+          or (request.client.host if request.client else "?"))
+    simdi = time.time()
+    k = [t for t in _SINIR.get(ip, []) if simdi - t < 86400]
+    if len(k) >= gun:
+        raise HTTPException(429, "Bugünlük soru hakkınız doldu; yarın tekrar deneyin.")
+    if sum(simdi - t < 60 for t in k) >= dakika:
+        raise HTTPException(429, "Çok sık soru sordunuz; bir dakika sonra tekrar deneyin.")
+    k.append(simdi)
+    _SINIR[ip] = k
+    if len(_SINIR) > 5000:  # eski kayıtları at
+        for key in [x for x, v in _SINIR.items() if not v or simdi - v[-1] > 86400]:
+            _SINIR.pop(key, None)
+
+
 @app.post("/api/sor")
 def sor(request: Request, s: Soru):
+    _hiz_siniri(request)
     t0 = time.time()
     r = answer(con, s.soru, Filtre(daire=s.daire or None, yil_min=s.yil_min, yil_max=s.yil_max))
     pilot.kaydet_sorgu(con, request.state.kullanici, "sor", s.soru, len(r["kararlar"]), t0)

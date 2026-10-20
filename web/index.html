@@ -177,6 +177,43 @@ h3{font-family:var(--mono);font-size:11.5px;font-weight:500;text-transform:upper
 .detail .acilis{padding:2px 0}
 .acilis p{margin:0;color:var(--ink-2);font-size:14px}
 .foot{padding:22px 24px 44px;color:var(--ink-2);font-size:12.5px;line-height:1.65;border-top:1px solid var(--line);margin-top:8px}
+/* yapay zekâ asistanı */
+.asist{position:fixed;right:20px;bottom:20px;z-index:40;font-family:var(--sans)}
+.asist-btn{width:66px;height:66px;border-radius:50%;border:2px solid rgb(255 255 255 / .22);padding:0;cursor:pointer;background:radial-gradient(circle at 32% 26%,#14707F,var(--petrol) 70%);box-shadow:0 10px 28px rgb(6 37 43 / .45),0 0 0 0 rgb(75 224 190 / .5);animation:ahalo 3.2s infinite;transition:transform .2s}
+.asist-btn:hover{transform:translateY(-2px) scale(1.04)}
+@keyframes ahalo{70%{box-shadow:0 10px 28px rgb(6 37 43 / .45),0 0 0 14px rgb(75 224 190 / 0)}100%{box-shadow:0 10px 28px rgb(6 37 43 / .45),0 0 0 0 rgb(75 224 190 / 0)}}
+.asist svg{display:block;width:100%;height:100%}
+.asist .goz{animation:blink 5s infinite;transform-origin:center;transform-box:fill-box}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.08)}}
+.asist .ant{animation:apulse 2s infinite}
+@keyframes apulse{50%{opacity:.35}}
+.asist-ipucu{position:absolute;right:76px;bottom:12px;background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:var(--shadow);padding:9px 13px;border-radius:14px 14px 4px 14px;font-size:13.5px;white-space:nowrap;animation:up .4s both;cursor:pointer}
+.asist-panel{position:absolute;right:0;bottom:80px;width:min(390px,calc(100vw - 24px));height:min(580px,calc(100vh - 120px));background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 24px 60px rgb(6 37 43 / .35);display:flex;flex-direction:column;overflow:hidden;transform-origin:bottom right;animation:apanel .22s cubic-bezier(.2,.8,.2,1)}
+@keyframes apanel{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}
+.asist-ust{display:flex;align-items:center;gap:11px;padding:12px 14px;background:var(--petrol);color:var(--on-petrol)}
+.asist-ust .av{width:38px;height:38px;border-radius:50%;background:var(--petrol-2);flex:none}
+.asist-ust b{display:block;font-family:var(--display);font-weight:400;font-size:17px;line-height:1.1}
+.asist-ust span{font-size:12px;color:var(--on-petrol-2)}
+.asist-ust button{margin-left:auto;background:none;border:0;color:var(--on-petrol-2);font-size:22px;line-height:1;cursor:pointer;padding:4px 8px;border-radius:8px}
+.asist-ust button:hover{color:var(--on-petrol);background:rgb(255 255 255 / .1)}
+.asist-ms{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--paper)}
+.as-b{max-width:92%;padding:9px 12px;border-radius:14px;font-size:14px;line-height:1.55;animation:up .3s both}
+.as-b.ben{align-self:flex-end;background:var(--petrol);color:var(--on-petrol);border-bottom-right-radius:4px}
+.as-b.ai{align-self:flex-start;background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:4px}
+.as-b.ai p{margin:0 0 7px} .as-b.ai h4{font-family:var(--display);font-weight:400;font-size:15.5px;margin:10px 0 4px}
+.as-b.ai ul{margin:4px 0;padding-left:18px} .as-b.ai li{margin:2px 0}
+.as-b .busy{padding:2px 0}
+.as-ek{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.as-chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 10px;background:var(--paper)}
+.as-chips button{font:inherit;font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.as-chips button:hover{border-color:var(--mint);background:var(--mint-soft)}
+.asist-form{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line);background:var(--surface)}
+.asist-form input{flex:1;min-width:0;padding:10px 13px;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);font:inherit;font-size:14px}
+.asist-form input:focus{outline:0;border-color:var(--mint);box-shadow:0 0 0 3px rgb(20 168 137 / .18)}
+.asist-form button{border:0;border-radius:999px;background:var(--mint-on-dark);color:#062A2F;font:inherit;font-weight:800;padding:0 16px;cursor:pointer}
+.asist-not{font-size:11.5px;color:var(--ink-2);padding:0 14px 8px;background:var(--surface)}
+@media (max-width:620px){.asist{right:12px;bottom:12px}.asist-btn{width:58px;height:58px}.asist-panel{bottom:70px;height:min(560px,calc(100vh - 100px))}.asist-ipucu{display:none}}
+@media (prefers-reduced-motion:reduce){.asist-btn,.asist .goz,.asist .ant{animation:none}}
 .hidden{display:none !important}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
 </style>
@@ -279,6 +316,17 @@ h3{font-family:var(--mono);font-size:11.5px;font-weight:500;text-transform:upper
     <div class="stats" id="stats"></div>
   </section>
 </main>
+<div class="asist" id="asist">
+  <div class="asist-panel hidden" id="as-panel" role="dialog" aria-label="YargitAI asistanı">
+    <div class="asist-ust"><div class="av" data-kafa></div><div><b>YargitAI Asistan</b><span>yalnız veritabanındaki kararlara dayanır</span></div><button type="button" id="as-kapat" aria-label="Kapat">×</button></div>
+    <div class="asist-ms" id="as-ms" aria-live="polite"></div>
+    <div class="as-chips" id="as-chips"></div>
+    <form class="asist-form" id="as-form"><input id="as-q" placeholder="Hukuki bir soru sorun…" autocomplete="off" aria-label="Soru"><button>Sor</button></form>
+    <div class="asist-not">Hukuki görüş değildir; künyeleri resmî kaynaktan doğrulayın.</div>
+  </div>
+  <div class="asist-ipucu hidden" id="as-ipucu">Sorunuz mu var? Kararlara sorun</div>
+  <button class="asist-btn" id="as-btn" type="button" aria-label="Yapay zekâ asistanını aç" data-kafa></button>
+</div>
 <footer class="wrap foot" id="foot">YargitAI bağımsız bir araştırma aracıdır; Yargıtay, Adalet Bakanlığı ya da herhangi bir kamu kurumuyla bağlantısı yoktur. Veritabanı kamuya açık Yargıtay kararlarından derlenmiştir ve <b id="foot-kapsam">2020–2023</b> yıllarını kapsar; daha yeni kararlar henüz yok. Çıktılar hukuki görüş değildir; künyeleri kullanmadan önce resmî kaynaktan doğrulayın.</footer>
 <script>
 const $=s=>document.querySelector(s);
@@ -377,8 +425,9 @@ $('#f-sor').onsubmit=async e=>{
   const stop=busy($('#cevap'),['Kararlar taranıyor','İlgili kararlar seçiliyor','Cevap yazılıyor, künyeler doğrulanacak']);
   $('#cevap-kararlar').innerHTML=skel(4);
   const t0=Date.now();
-  const r=await (await fetch('/api/sor',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({soru})})).json();
+  const rs=await fetch('/api/sor',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({soru})}); const r=await rs.json();
   stop();
+  if(!rs.ok){ $('#cevap').innerHTML=`<div class="warn">${esc(r.detail||'Şu an cevap veremiyorum.')}</div>`; $('#cevap-kararlar').innerHTML=''; return; }
   const sn=Math.round((Date.now()-t0)/1000), bad=(r.dogrulama||[]).length;
   const stamp=r.mod==='llm'?(bad?`<span class="stampmark bad">${bad} künye doğrulanamadı</span>`:'<span class="stampmark ok">Künyeler doğrulandı</span>')
     :r.mod==='cikarimsal'?'<span class="stampmark y">Doğrudan alıntı</span>':'';
@@ -605,6 +654,7 @@ function md(src){
   const kon=e=>{const r=cv.getBoundingClientRect(); return[e.clientX-r.left,e.clientY-r.top];};
   const bos=e=>!e.target.closest(SKIP);
   panel.addEventListener('pointerdown',e=>{if(!bos(e)) return; drag={x:e.clientX,y:e.clientY,m:false}; panel.setPointerCapture(e.pointerId);});
+  panel.addEventListener('selectstart',e=>{ if(drag) e.preventDefault(); });  // sürüklerken alttaki metin seçilmesin
   panel.addEventListener('pointermove',e=>{
     if(!drag&&!bos(e)){hover=null;tip.style.opacity=0;panel.style.cursor='';return;}
     if(drag){ const dx=e.clientX-drag.x,dy=e.clientY-drag.y; if(Math.abs(dx)+Math.abs(dy)>3) drag.m=true;
@@ -631,6 +681,55 @@ function md(src){
 })();
 
 
+
+// Yapay zekâ asistanı: /api/sor (atıf doğrulamalı cevap) üzerine sohbet penceresi.
+(function(){
+  const KAFA=`<svg viewBox="0 0 64 64" aria-hidden="true"><circle class="ant" cx="32" cy="7" r="3.2" fill="#4BE0BE"/><rect x="30.9" y="9" width="2.2" height="8" fill="#9CC3C2"/>
+    <rect x="9" y="26" width="5" height="12" rx="2.5" fill="#9CC3C2"/><rect x="50" y="26" width="5" height="12" rx="2.5" fill="#9CC3C2"/>
+    <rect x="13" y="16" width="38" height="36" rx="16" fill="#EAF6F4"/><rect x="17" y="23" width="30" height="21" rx="10" fill="#06252B"/>
+    <g id="as-goz"><ellipse class="goz" cx="26" cy="33" rx="3.4" ry="4.2" fill="#4BE0BE"/><ellipse class="goz" cx="38" cy="33" rx="3.4" ry="4.2" fill="#4BE0BE"/></g>
+    <path d="M27 40.5q5 3 10 0" stroke="#4BE0BE" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>`;
+  document.querySelectorAll('[data-kafa]').forEach(e=>e.innerHTML=KAFA);
+  const btn=$('#as-btn'), panel=$('#as-panel'), ms=$('#as-ms'), ip=$('#as-ipucu'), q=$('#as-q');
+  let acik=false, mesgul=false, selam=false;
+  const ORNEK=['İşçi fazla mesaiyi tanıkla ispatlayabilir mi?','Boşanmada yoksulluk nafakası şartları nelerdir?','Haksız tahrik indirimi nasıl uygulanır?'];
+  try{ if(!sessionStorage.getItem('as-ipucu')) setTimeout(()=>{ if(!acik){ip.classList.remove('hidden'); setTimeout(()=>ip.classList.add('hidden'),7000);} sessionStorage.setItem('as-ipucu','1'); },5000); }catch(e){}
+  // gözler imleci izler
+  if(!REDUCE) document.addEventListener('pointermove',e=>{
+    const r=btn.getBoundingClientRect(), dx=e.clientX-(r.left+r.width/2), dy=e.clientY-(r.top+r.height/2), d=Math.hypot(dx,dy)||1, k=Math.min(2.4,d/80);
+    btn.querySelector('#as-goz')?.setAttribute('transform',`translate(${dx/d*k},${dy/d*k})`); });
+  function ekle(cls,html){ const d=document.createElement('div'); d.className='as-b '+cls; d.innerHTML=html; ms.appendChild(d); ms.scrollTop=ms.scrollHeight; return d; }
+  function ac(){ acik=true; panel.classList.remove('hidden'); ip.classList.add('hidden');
+    if(!selam){ selam=true; ekle('ai','Merhaba, ben YargitAI asistanı. Hukuki bir soru sorun; yalnız veritabanındaki Yargıtay kararlarına dayanarak, künyeleri doğrulayarak cevaplarım.');
+      $('#as-chips').innerHTML=ORNEK.map(o=>`<button type="button">${esc(o)}</button>`).join('');
+      $('#as-chips').querySelectorAll('button').forEach(b=>b.onclick=()=>sor(b.textContent)); }
+    setTimeout(()=>q.focus(),50); }
+  function kapat(){ acik=false; panel.classList.add('hidden'); }
+  btn.onclick=()=>acik?kapat():ac(); $('#as-kapat').onclick=kapat;
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&acik) kapat(); });
+  $('#as-form').onsubmit=e=>{ e.preventDefault(); const t=q.value.trim(); if(t) sor(t); };
+  async function sor(soru){
+    if(mesgul) return; mesgul=true; q.value=''; $('#as-chips').innerHTML='';
+    ekle('ben',esc(soru));
+    const cev=ekle('ai',''); const dur=busy(cev,['Kararlar taranıyor','İlgili kararlar seçiliyor','Cevap yazılıyor, künyeler doğrulanacak']);
+    try{
+      const rs=await fetch('/api/sor',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({soru})});
+      const r=await rs.json(); dur();
+      if(!rs.ok){ cev.innerHTML=`<div class="warn" style="margin:0">${esc(r.detail||'Şu an cevap veremiyorum.')}</div>`; }
+      else{
+        const bad=(r.dogrulama||[]).length;
+        const damga=r.mod==='llm'?(bad?`<span class="chip bozma">${bad} künye doğrulanamadı</span>`:'<span class="chip onama">Künyeler doğrulandı</span>'):'<span class="chip">Doğrudan alıntı</span>';
+        cev.innerHTML=md(r.cevap)+`<div class="as-ek">${damga}<span class="chip link" id="as-ac-${Date.now()}">Emsal Ara'da aç</span></div>`;
+        cev.querySelectorAll('.ref').forEach(el=>{const k=r.kararlar[+el.dataset.k-1]; if(k) el.onclick=()=>git(k.rid); else el.classList.add('chip','bozma');});
+        cev.querySelector('.as-ek .link').onclick=()=>{ $('nav button[data-tab=ara]').click(); $('#q').value=soru; $('#f-ara').requestSubmit(); if(innerWidth<700) kapat(); scrollTo({top:0,behavior:'smooth'}); };
+        if(r.kararlar&&r.kararlar.length) cev.insertAdjacentHTML('beforeend',`<div class="as-ek">${r.kararlar.slice(0,4).map((k,i)=>`<span class="chip link" data-rid="${k.rid}">${esc(k.ref||'K'+(i+1))} · ${esc((k.kunye||'').split(',')[0])}</span>`).join('')}</div>`);
+        cev.querySelectorAll('[data-rid]').forEach(c=>c.onclick=()=>git(c.dataset.rid));
+      }
+    }catch(err){ dur(); cev.innerHTML='<div class="warn" style="margin:0">Bağlantı hatası; birazdan tekrar deneyin.</div>'; }
+    mesgul=false; ms.scrollTop=Math.max(0,cev.offsetTop-10);
+  }
+  function git(rid){ $('nav button[data-tab=ara]').click(); openKarar(rid); if(innerWidth<700) kapat(); }
+})();
 </script>
 </body>
 </html>
