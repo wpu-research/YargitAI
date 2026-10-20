@@ -8,7 +8,7 @@ from fastapi import FastAPI, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from pydantic import BaseModel
 
-from . import dilekce, graph, pilot
+from . import dilekce, graph, pilot, rapor
 from .anonim import maskele
 from .answer import answer, kunye
 from .db import ROOT, connect, unpack
@@ -25,6 +25,7 @@ def _isit():
     import threading
     from .search import VEC
     threading.Thread(target=VEC.load, daemon=True).start()
+    threading.Thread(target=lambda: [_onbellek(a) for a in ("rapor", "ag")], daemon=True).start()
 
 
 @app.middleware("http")
@@ -196,6 +197,33 @@ def istatistik():
     }
     _ISTATISTIK.update(_t=time.time(), veri=veri)
     return veri
+
+
+_RAPOR: dict = {}
+_RAPOR_KILIT = __import__("threading").Lock()
+
+
+def _onbellek(ad: str) -> dict:
+    # Veri yalnız yeniden yüklemeyle değişir; ilk hesaplamadan sonra süreç ömrü boyunca tutulur.
+    # Ayrı bağlantı: ağır sorgular ana bağlantıyı bloklamasın.
+    with _RAPOR_KILIT:
+        if ad not in _RAPOR:
+            c = connect()
+            try:
+                _RAPOR[ad] = {"rapor": rapor.raporlar, "ag": rapor.ag}[ad](c)
+            finally:
+                c.close()
+    return _RAPOR[ad]
+
+
+@app.get("/api/rapor")
+def rapor_api():
+    return _onbellek("rapor")
+
+
+@app.get("/api/ag")
+def ag_api():
+    return _onbellek("ag")
 
 
 @app.get("/")

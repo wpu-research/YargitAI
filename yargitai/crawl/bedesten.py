@@ -94,7 +94,7 @@ class Bedesten:
         except ServiceDown:
             return False
 
-    def search(self, *, phrase: str = "", item_type: str = "YARGITAYKARARI",
+    def search(self, *, phrase: str = "karar", item_type: str = "YARGITAYKARARI",
                start: date | None = None, end: date | None = None,
                page: int = 1, page_size: int = 100, birim: str | None = None) -> tuple[list[Hit], int]:
         data: dict = {
